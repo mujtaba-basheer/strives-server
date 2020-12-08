@@ -20,9 +20,7 @@ exports.signup = asyncHandler(async (req, res, next, db) => {
             data: user,
             token: authUtil.generateToken(user),
         });
-    } else {
-        return next(new AppError("User already exists.", 400));
-    }
+    } else return next(new AppError("User already exists.", 400));
 });
 
 // signin a user
@@ -51,7 +49,7 @@ exports.resetPass = asyncHandler(async (req, res, next, db) => {
     try {
         // updating user details
         await db.collection("users").updateOne(
-            { email: req.body.email },
+            { email: req.user.email },
             {
                 // storing hashed password to user object
                 $set: { password: authUtil.hashPassword(req.body.password) },
