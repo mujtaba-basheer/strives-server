@@ -1,6 +1,7 @@
 const authUtil = require("../utils/auth");
 const asyncHandler = require("express-async-handler");
 const { ObjectID } = require("mongodb");
+const AppError = require("../utils/appError");
 
 const protect = asyncHandler(async (req, res, next, db) => {
     let token;
@@ -14,20 +15,18 @@ const protect = asyncHandler(async (req, res, next, db) => {
 
             const decoded = authUtil.verifyToken(token);
 
-            req.user = await db.findOne({ _id: ObjectID(decoded.id) });
+            req.user = await db
+                .collection("users")
+                .findOne({ _id: ObjectID(decoded._id) });
 
             next();
         } catch (error) {
             console.error(error);
-            res.status(401);
-            throw new Error("Not Authorized, Token Failed.");
+            return next(new AppError("Not Authorized, Token Failed.", 401));
         }
     }
 
-    if (!token) {
-        res.status(401);
-        throw new Error("Not Authorized, No Token.");
-    }
+    if (!token) return next(new AppError("Not Authorized, Token Failed.", 401));
 });
 
 module.exports = { protect };

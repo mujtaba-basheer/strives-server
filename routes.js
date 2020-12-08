@@ -5,8 +5,10 @@ require("dotenv").config();
 require("colors");
 
 // importing controllers
-
 const authController = require("./controller/auth");
+
+// importing middleware
+const { protect } = require("./middleware/auth");
 
 // getting db uri
 const db_uri = process.env.DB_URI.replace(
@@ -14,7 +16,7 @@ const db_uri = process.env.DB_URI.replace(
     process.env.DB_PASSWORD
 );
 
-// setting connection options
+// connection options
 const options = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -29,11 +31,23 @@ MongoClient.connect(db_uri, options, (err, client) => {
         console.log(`Connected to database. 🔛`.blue);
         const db = client.db(process.env.DB_NAME);
 
-        // setting up routes
+        // SETTING UP ROUTES
 
         // USER routes
+
+        // register
         router.post("/register", (req, res, next) =>
             authController.signup(req, res, next, db)
+        );
+        //login
+        router.post("/login", (req, res, next) =>
+            authController.login(req, res, next, db)
+        );
+        // reset password
+        router.post(
+            "/reset-pass",
+            (req, res, next) => protect(req, res, next, db),
+            (req, res, next) => authController.resetPass(req, res, next, db)
         );
     }
 });

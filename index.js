@@ -1,12 +1,12 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
-
-// const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 require("colors");
 
-// importing the routes
+// importing error middleware
+const { notFound, errorHandler } = require("./middleware/error");
 
+// importing the routes
 const routes = require("./routes");
 
 dotenv.config();
@@ -25,8 +25,8 @@ app.get("/", (req, res) => {
 
 // custom error handlers
 
-// app.use(notFound);
-// app.use(errorHandler);
+app.use(notFound);
+app.use(errorHandler);
 
 const port = process.env.PORT || 5001;
 app.listen(
