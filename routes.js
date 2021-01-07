@@ -39,6 +39,18 @@ MongoClient.connect(db_uri, options, (err, client) => {
         router.post("/register", (req, res, next) =>
             authController.signup(req, res, next, db)
         );
+        // send OTP
+        router.post("/send-otp", (req, res, next) =>
+            authController.sendOtpStep(req, res, next, db)
+        );
+        // resend OTP
+        router.post("/resend-otp", (req, res, next) =>
+            authController.resendOtp(req, res, next, db)
+        );
+        // verify OTP
+        router.post("/verify-otp", (req, res, next) =>
+            authController.verifyOtp(req, res, next, db)
+        );
         //login
         router.post("/login", (req, res, next) =>
             authController.login(req, res, next, db)
