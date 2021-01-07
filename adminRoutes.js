@@ -5,10 +5,10 @@ require("dotenv").config();
 require("colors");
 
 // importing controllers
-const authController = require("./controller/auth");
+const adminController = require("./controller/admin");
 
 // importing middleware
-const { protect } = require("./middleware/auth");
+const { protect, checkAdmin } = require("./middleware/auth");
 
 // getting db uri
 const db_uri = process.env.DB_URI.replace(
@@ -35,27 +35,31 @@ MongoClient.connect(db_uri, options, (err, client) => {
 
         /* ----------- Auth Routes ----------- */
 
-        // register
-        router.post("/register", (req, res, next) =>
-            authController.signup(req, res, next, db)
-        );
         //login
         router.post("/login", (req, res, next) =>
-            authController.login(req, res, next, db)
-        );
-        // reset password
-        router.post(
-            "/reset-pass",
-            (req, res, next) => protect(req, res, next, db),
-            (req, res, next) => authController.resetPass(req, res, next, db)
+            adminController.login(req, res, next, db)
         );
 
-        /* ----------- Action Routes ----------- */
-        router.get("/kill", (req, res) => {
-            console.log(`closing database connection...`.yellow);
-            client.close();
-            res.send(1);
-        });
+        /* ----------- Tags Routes ----------- */
+
+        // add tag
+        router.post(
+            "/tag",
+            (req, res, next) => checkAdmin(req, res, next, db),
+            (req, res, next) => adminController.addTag(req, res, next, db)
+        );
+        // get tags
+        router.get(
+            "/tag",
+            (req, res, next) => checkAdmin(req, res, next, db),
+            (req, res, next) => adminController.getTags(req, res, next, db)
+        );
+        // delete tag
+        router.delete(
+            "/tag/:id",
+            (req, res, next) => checkAdmin(req, res, next, db),
+            (req, res, next) => adminController.deleteTag(req, res, next, db)
+        );
     }
 });
 
