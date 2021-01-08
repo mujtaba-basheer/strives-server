@@ -52,7 +52,7 @@ MongoClient.connect(db_uri, options, (err, client) => {
             authController.verifyOtp(req, res, next, db)
         );
         // send new generated password
-        router.post("/send-pass", (req, res, next) =>
+        router.post("/gen-pass", (req, res, next) =>
             authController.genPassword(req, res, next, db)
         );
         //login
