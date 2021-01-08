@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const authUtil = require("../utils/auth");
 const AppError = require("../utils/appError");
 const { sendOtp } = require("../utils/sendSMS");
+const { sendNewPassword } = require("../utils/sendEmail");
 const { ObjectID } = require("mongodb");
 
 // register a new user
@@ -135,6 +136,38 @@ exports.login = asyncHandler(async (req, res, next, db) => {
             });
         } else return next(new AppError("Incorrect Password.", 401));
     } else return next(new AppError("User not found.", 404));
+});
+
+// send a generated password to user's mail
+exports.genPassword = asyncHandler(async (req, res, next, db) => {
+    const { email } = req.body;
+    try {
+        // checking if user exists
+        const user = await db.collection("users").findOne({ email });
+        if (user) {
+            // send new password to user's mail
+            const { pass, data } = await sendNewPassword(email);
+            console.log(data);
+
+            // updating password in database
+            await db.collection("users").updateOne(
+                { email },
+                {
+                    $set: {
+                        password: authUtil.hashPassword(pass),
+                    },
+                }
+            );
+
+            res.status(200).json({
+                status: true,
+                message: "Password Sent",
+            });
+        } else return next(new AppError("Email not found", 500));
+    } catch (error) {
+        console.error(error);
+        return next(new AppError("Error generating password", 500));
+    }
 });
 
 // reset password

@@ -51,6 +51,10 @@ MongoClient.connect(db_uri, options, (err, client) => {
         router.post("/verify-otp", (req, res, next) =>
             authController.verifyOtp(req, res, next, db)
         );
+        // send new generated password
+        router.post("/send-pass", (req, res, next) =>
+            authController.genPassword(req, res, next, db)
+        );
         //login
         router.post("/login", (req, res, next) =>
             authController.login(req, res, next, db)
