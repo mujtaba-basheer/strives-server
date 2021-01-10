@@ -33,11 +33,6 @@ MongoClient.connect(db_uri, options, (err, client) => {
 
         /* *********** SETTING UP ROUTES *********** */
 
-        /* ----------- Test Route ----------- */
-        router.get("/test", (req, res) =>
-            res.status(200).send("Working Alright")
-        );
-
         /* ----------- Auth Routes ----------- */
 
         // register

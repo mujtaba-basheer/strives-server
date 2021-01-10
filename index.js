@@ -1,7 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const morgan = require("morgan");
 const app = express();
 dotenv.config();
 require("colors");
@@ -14,7 +13,10 @@ const routes = require("./routes");
 const adminRoutes = require("./adminRoutes");
 
 // logging api requests in development environment
-if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
+if (process.env.NODE_ENV === "development") {
+    const morgan = require("morgan");
+    app.use(morgan("dev"));
+}
 
 // adding cors for allowing API calls
 app.use(cors());
