@@ -172,20 +172,31 @@ exports.genPassword = asyncHandler(async (req, res, next, db) => {
 
 // reset password
 exports.resetPass = asyncHandler(async (req, res, next, db) => {
-    try {
-        // updating user details
-        await db.collection("users").updateOne(
-            { email: req.user.email },
-            {
-                // storing hashed password to user object
-                $set: { password: authUtil.hashPassword(req.body.password) },
-            }
-        );
+    const { currentPass, newPassword } = req.body;
 
-        res.status(200).json({
-            status: true,
-            message: "Password updated successfully",
-        });
+    try {
+        // fetching user
+        const user = await db
+            .collection("users")
+            .findOne({ _id: ObjectID(req.user["_id"]) });
+
+        // checking if password is correct
+        if (authUtil.comparePasswords(currentPass, user["password"])) {
+            await db.collection("users").updateOne(
+                { _id: ObjectID(req.user["_id"]) },
+                {
+                    // storing hashed password to user object
+                    $set: {
+                        password: authUtil.hashPassword(newPassword),
+                    },
+                }
+            );
+
+            res.status(200).json({
+                status: true,
+                message: "Password updated successfully",
+            });
+        } else return next(new AppError("Incorrect Password", 401));
     } catch (error) {
         console.error(error);
         return next(new AppError("Error updating password", 500));
