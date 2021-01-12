@@ -6,6 +6,7 @@ require("colors");
 
 // importing controllers
 const authController = require("./controller/auth");
+const userController = require("./controller/user");
 
 // importing middleware
 const { protect } = require("./middleware/auth");
@@ -64,6 +65,19 @@ MongoClient.connect(db_uri, options, (err, client) => {
             "/reset-pass",
             (req, res, next) => protect(req, res, next, db),
             (req, res, next) => authController.resetPass(req, res, next, db)
+        );
+
+        /* ----------- User Routes ----------- */
+
+        router.get(
+            "/get-details",
+            (req, res, next) => protect(req, res, next, db),
+            (req, res, next) => userController.get(req, res, next, db)
+        );
+        router.put(
+            "/update-details",
+            (req, res, next) => protect(req, res, next, db),
+            (req, res, next) => userController.update(req, res, next, db)
         );
 
         /* ----------- Action Routes ----------- */

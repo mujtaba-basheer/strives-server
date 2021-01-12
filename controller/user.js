@@ -1,6 +1,5 @@
 const { ObjectID } = require("mongodb");
 const asyncHandler = require("express-async-handler");
-const authUtil = require("../utils/auth");
 const AppError = require("../utils/appError");
 
 // get user details
