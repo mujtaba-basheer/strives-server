@@ -139,55 +139,61 @@ exports.deleteCategory = asyncHandler(async (req, res, next, db) => {
 
 /* ----------- Sub-Category ----------- */
 
-exports.addCategory = asyncHandler(async (req, res, next, db) => {
+exports.addSubCategory = asyncHandler(async (req, res, next, db) => {
+    const data = req.body;
+    data.slug_name = slugify(data.name, slugOptions);
+
     try {
-        // inserting category
-        await db.collection("categories").insertOne(req.body);
+        // inserting sub-category
+        await db.collection("sub-categories").insertOne(data);
 
         res.status(200).json({
             status: true,
-            message: "Category Added Successfully",
+            message: "Sub-Category Added Successfully",
         });
     } catch (error) {
         console.error(error);
-        return next(new AppError("Error adding category", 500));
+        return next(new AppError("Error adding sub-category", 500));
     }
 });
 
-exports.getCategory = asyncHandler(async (req, res, next, db) => {
+exports.getSubCategory = asyncHandler(async (req, res, next, db) => {
     try {
-        // getting category
-        await db
-            .collection("categories")
+        // getting sub-category
+        const sub_category = await db
+            .collection("sub-categories")
             .findOne({ _id: ObjectID(req.params.id) });
 
         res.status(200).json({
             status: true,
-            message: "Category Added Successfully",
+            data: sub_category,
         });
     } catch (error) {
         console.error(error);
-        return next(new AppError("Error adding category", 500));
+        return next(new AppError("Error adding sub-category", 500));
     }
 });
 
-exports.getCategories = asyncHandler(async (req, res, next, db) => {
+// get sub-categories
+exports.getSubCategories = asyncHandler(async (req, res, next, db) => {
     try {
-        // getting categories
-        const categories = await db.collection("categories").find().toArray();
+        // getting sub-categories
+        const sub_categories = await db
+            .collection("sub-categories")
+            .find()
+            .toArray();
 
         res.status(200).json({
             status: true,
-            data: categories,
-            message: "Category Added Successfully",
+            data: sub_categories,
         });
     } catch (error) {
         console.error(error);
-        return next(new AppError("Error adding category", 500));
+        return next(new AppError("Error fetching sub-categories", 500));
     }
 });
 
-exports.updateCategory = asyncHandler(async (req, res, next, db) => {
+exports.updateSubCategory = asyncHandler(async (req, res, next, db) => {
     try {
         // updating category
         await db
@@ -204,7 +210,7 @@ exports.updateCategory = asyncHandler(async (req, res, next, db) => {
     }
 });
 
-exports.deleteCategory = asyncHandler(async (req, res, next, db) => {
+exports.deleteSubCategory = asyncHandler(async (req, res, next, db) => {
     try {
         // deleting category
         await db
@@ -225,18 +231,26 @@ exports.deleteCategory = asyncHandler(async (req, res, next, db) => {
 
 exports.addTag = asyncHandler(async (req, res, next, db) => {
     const { tag } = req.body;
+    const name = slugify(tag, slugOptions);
 
     try {
-        // adding tag
-        await db.collection("tags").insertOne({
-            // storing sluggified form of entered tag
-            name: slugify(tag, slugOptions),
-        });
+        // fetching tag if present
+        const tagDoc = await db.collection("tags").findOne({ name });
 
-        res.status(201).json({
-            status: true,
-            message: "Tag Added Successfully",
-        });
+        // checking if tag already exists
+        if (!tagDoc) {
+            // adding tag
+            await db.collection("tags").insertOne({
+                // storing sluggified form of entered tag
+                name: slugify(tag, slugOptions),
+            });
+
+            res.status(201).json({
+                status: true,
+                message: "Tag Added Successfully",
+            });
+        } else
+            return next(new AppError("Tag with that name already exists", 401));
     } catch (error) {
         console.error(error);
         return next(new AppError("Error adding tag", 500));

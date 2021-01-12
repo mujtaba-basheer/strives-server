@@ -60,6 +60,29 @@ MongoClient.connect(db_uri, options, (err, client) => {
             (req, res, next) => checkAdmin(req, res, next, db),
             (req, res, next) => adminController.deleteTag(req, res, next, db)
         );
+
+        /* ----------- Sub-Category Routes ----------- */
+
+        // add sub-category
+        router.post(
+            "/sub-category",
+            (req, res, next) => checkAdmin(req, res, next, db),
+            (req, res, next) =>
+                adminController.addSubCategory(req, res, next, db)
+        );
+        // get sub-categories
+        router.get(
+            "/sub-categories",
+            (req, res, next) => checkAdmin(req, res, next, db),
+            (req, res, next) =>
+                adminController.getSubCategories(req, res, next, db)
+        );
+        // // delete tag
+        // router.delete(
+        //     "/tag/:id",
+        //     (req, res, next) => checkAdmin(req, res, next, db),
+        //     (req, res, next) => adminController.deleteTag(req, res, next, db)
+        // );
     }
 });
 
