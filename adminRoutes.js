@@ -77,12 +77,20 @@ MongoClient.connect(db_uri, options, (err, client) => {
             (req, res, next) =>
                 adminController.getSubCategories(req, res, next, db)
         );
-        // // delete tag
-        // router.delete(
-        //     "/tag/:id",
-        //     (req, res, next) => checkAdmin(req, res, next, db),
-        //     (req, res, next) => adminController.deleteTag(req, res, next, db)
-        // );
+        // delete sub-category
+        router.delete(
+            "/sub-category/:id",
+            (req, res, next) => checkAdmin(req, res, next, db),
+            (req, res, next) =>
+                adminController.deleteSubCategory(req, res, next, db)
+        );
+        // update sub-category
+        router.put(
+            "/sub-category/:id",
+            (req, res, next) => checkAdmin(req, res, next, db),
+            (req, res, next) =>
+                adminController.updateSubCategory(req, res, next, db)
+        );
     }
 });
 

@@ -181,6 +181,7 @@ exports.getSubCategories = asyncHandler(async (req, res, next, db) => {
         const sub_categories = await db
             .collection("sub-categories")
             .find()
+            .sort({ slug_name: 1 })
             .toArray();
 
         res.status(200).json({
@@ -193,37 +194,47 @@ exports.getSubCategories = asyncHandler(async (req, res, next, db) => {
     }
 });
 
+// update sub-category
 exports.updateSubCategory = asyncHandler(async (req, res, next, db) => {
+    const data = req.body;
+    const { id } = req.params;
+
+    data["slug_name"] = slugify(data.name, slugOptions);
+
     try {
-        // updating category
-        await db
-            .collection("categories")
-            .updateOne({ _id: ObjectID(req.params.id) });
+        // updating sub-category
+        await db.collection("sub-categories").updateOne(
+            { _id: ObjectID(id) },
+            {
+                $set: data,
+            }
+        );
 
         res.status(200).json({
             status: true,
-            message: "Category Added Successfully",
+            message: "Sub-Category Updated Successfully",
         });
     } catch (error) {
         console.error(error);
-        return next(new AppError("Error adding category", 500));
+        return next(new AppError("Error updating sub-category", 500));
     }
 });
 
+// delete sub-category by ID
 exports.deleteSubCategory = asyncHandler(async (req, res, next, db) => {
+    const { id } = req.params;
+
     try {
-        // deleting category
-        await db
-            .collection("categories")
-            .deleteOne({ _id: ObjectID(req.params.id) });
+        // deleting sub-category
+        await db.collection("sub-categories").deleteOne({ _id: ObjectID(id) });
 
         res.status(200).json({
             status: true,
-            message: "Category Added Successfully",
+            message: "Sub-Category Deleting Successfully",
         });
     } catch (error) {
         console.error(error);
-        return next(new AppError("Error adding category", 500));
+        return next(new AppError("Error deleting sub-category", 500));
     }
 });
 
