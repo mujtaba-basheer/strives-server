@@ -55,10 +55,13 @@ exports.resetPass = asyncHandler(async (req, res, next, db) => {
 
 /* ----------- Category ----------- */
 
+// add category
 exports.addCategory = asyncHandler(async (req, res, next, db) => {
+    const data = Object.assign({}, req.body);
+
     try {
         // inserting category
-        await db.collection("categories").insertOne(req.body);
+        await db.collection("categories").insertOne(data);
 
         res.status(200).json({
             status: true,
@@ -70,6 +73,7 @@ exports.addCategory = asyncHandler(async (req, res, next, db) => {
     }
 });
 
+// get category by id
 exports.getCategory = asyncHandler(async (req, res, next, db) => {
     try {
         // getting category
@@ -139,6 +143,7 @@ exports.deleteCategory = asyncHandler(async (req, res, next, db) => {
 
 /* ----------- Sub-Category ----------- */
 
+// add sub-category
 exports.addSubCategory = asyncHandler(async (req, res, next, db) => {
     const data = req.body;
     data.slug_name = slugify(data.name, slugOptions);
@@ -157,6 +162,7 @@ exports.addSubCategory = asyncHandler(async (req, res, next, db) => {
     }
 });
 
+// get sub-category by id
 exports.getSubCategory = asyncHandler(async (req, res, next, db) => {
     try {
         // getting sub-category

@@ -40,6 +40,36 @@ MongoClient.connect(db_uri, options, (err, client) => {
             adminController.login(req, res, next, db)
         );
 
+        /* ----------- Category Routes ----------- */
+
+        // add category
+        router.post(
+            "/category",
+            (req, res, next) => checkAdmin(req, res, next, db),
+            (req, res, next) => adminController.addCategory(req, res, next, db)
+        );
+        // get sub-categories
+        router.get(
+            "/sub-categories",
+            (req, res, next) => checkAdmin(req, res, next, db),
+            (req, res, next) =>
+                adminController.getSubCategories(req, res, next, db)
+        );
+        // delete sub-category
+        router.delete(
+            "/sub-category/:id",
+            (req, res, next) => checkAdmin(req, res, next, db),
+            (req, res, next) =>
+                adminController.deleteSubCategory(req, res, next, db)
+        );
+        // update sub-category
+        router.put(
+            "/sub-category/:id",
+            (req, res, next) => checkAdmin(req, res, next, db),
+            (req, res, next) =>
+                adminController.updateSubCategory(req, res, next, db)
+        );
+
         /* ----------- Tags Routes ----------- */
 
         // add tag
@@ -50,7 +80,7 @@ MongoClient.connect(db_uri, options, (err, client) => {
         );
         // get tags
         router.get(
-            "/tag",
+            "/tags",
             (req, res, next) => checkAdmin(req, res, next, db),
             (req, res, next) => adminController.getTags(req, res, next, db)
         );
