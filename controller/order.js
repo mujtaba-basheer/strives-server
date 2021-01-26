@@ -8,10 +8,10 @@ const AppError = require("../utils/appError");
 exports.getCredentials = asyncHandler(async (req, res, next, db) => {
   try {
     // extracting credentials from environment variables
-    const { KEY_ID, KEY_SECRET } = process.env;
+    const { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } = process.env;
     const credentials = {
-      key_id: KEY_ID,
-      key_secret: KEY_SECRET,
+      key_id: RAZORPAY_KEY_ID,
+      key_secret: RAZORPAY_KEY_SECRET,
     };
 
     res.status(200).json(credentials);
@@ -27,12 +27,12 @@ exports.createRazorpayOrder = asyncHandler(async (req, res, next, db) => {
 
   try {
     // extracting credentials from environment variables
-    const { KEY_ID, KEY_SECRET } = process.env;
+    const { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } = process.env;
 
     // creating Razorpay instance
     const razorpay = new Razorpay({
-      key_id: KEY_ID,
-      key_secret: KEY_SECRET,
+      key_id: RAZORPAY_KEY_ID,
+      key_secret: RAZORPAY_KEY_SECRET,
     });
 
     // order options
