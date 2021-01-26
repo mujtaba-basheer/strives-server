@@ -6,9 +6,22 @@ const AppError = require("../utils/appError");
 exports.get = asyncHandler(async (req, res, next, db) => {
   try {
     // fetching user details
-    const user = await db
+    const [user] = await db
       .collection("users")
-      .findOne({ _id: ObjectID(req.user["_id"]) });
+      .aggregate([
+        {
+          $match: { _id: ObjectID(req.user["_id"]) },
+        },
+        {
+          $lookup: {
+            from: "addresses",
+            foreignField: "_id",
+            localField: "address",
+            as: "address",
+          },
+        },
+      ])
+      .toArray();
 
     // checking if user exists
     if (user) {
