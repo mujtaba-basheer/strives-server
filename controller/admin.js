@@ -1,5 +1,5 @@
 const { ObjectID } = require("mongodb");
-const fs = require("fs");
+const uuid = require("uuid");
 const asyncHandler = require("express-async-handler");
 const uploadFile = require("../utils/uploadFile");
 const authUtil = require("../utils/auth");
@@ -300,7 +300,74 @@ exports.getTags = asyncHandler(async (req, res, next, db) => {
     });
   } catch (error) {
     console.error(error);
-    return next(new AppError("Error fetchings tag", 500));
+    return next(new AppError("Error fetching tags", 500));
+  }
+});
+
+/* ----------- Colours ----------- */
+
+exports.addColour = asyncHandler(async (req, res, next, db) => {
+  const { full_name, common_name, hexcode } = req.body;
+  const slug_name = slugify(common_name, slugOptions);
+
+  try {
+    // fetching colour if present
+    const colourDoc = await db.collection("colours").findOne({ hexcode });
+
+    // checking if colour already exists
+    if (!colourDoc) {
+      // adding colour
+      await db.collection("colours").insertOne({
+        full_name,
+        hexcode,
+        common_name,
+        slug_name,
+      });
+
+      res.status(201).json({
+        status: true,
+        message: "Colour Added Successfully",
+      });
+    } else
+      return next(new AppError("Colour with that hexcode already exists", 401));
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error adding colour", 500));
+  }
+});
+
+exports.deleteColour = asyncHandler(async (req, res, next, db) => {
+  try {
+    // deleting colour
+    await db.collection("colours").deleteOne({ _id: ObjectID(req.params.id) });
+
+    res.status(200).json({
+      status: true,
+      message: "Colour Deleted Successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error deleting colour", 500));
+  }
+});
+
+exports.getColours = asyncHandler(async (req, res, next, db) => {
+  try {
+    // fetching colours
+    const colours = await db
+      .collection("colours")
+      .find()
+      .sort({ full_name: 1 })
+      .toArray();
+
+    res.status(200).json({
+      status: true,
+      data: colours,
+      message: "Colours Fetched Successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error fetching colours.", 500));
   }
 });
 
@@ -308,15 +375,11 @@ exports.getTags = asyncHandler(async (req, res, next, db) => {
 
 exports.uploadImage = asyncHandler(async (req, res, next, db) => {
   try {
-    const { mimetype, path, originalname } = req.file;
-    console.log(mimetype);
-    const extension = originalname.substring(originalname.lastIndexOf("."));
-    const data = fs.readFileSync(path);
-    fs.unlinkSync(path);
+    const { mimeType, base64, extension } = req.body;
+    const fileName = uuid() + extension;
 
-    const resS3 = await uploadFile(mimetype, data, `generic${extension}`);
-    console.log(resS3);
-    res.send(true);
+    const resS3 = await uploadFile(mimeType, base64, fileName);
+    res.send(resS3);
   } catch (error) {
     console.error(error);
     return next(new AppError("Error", 503));

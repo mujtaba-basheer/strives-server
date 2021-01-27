@@ -89,6 +89,27 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => adminController.deleteTag(req, res, next, db)
     );
 
+    /* ----------- Colours Routes ----------- */
+
+    // add colour
+    router.post(
+      "/colour",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.addColour(req, res, next, db)
+    );
+    // get colours
+    router.get(
+      "/colours",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.getColours(req, res, next, db)
+    );
+    // delete colour
+    router.delete(
+      "/colour/:id",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.deleteColour(req, res, next, db)
+    );
+
     /* ----------- Sub-Category Routes ----------- */
 
     // add sub-category
@@ -120,7 +141,6 @@ MongoClient.connect(db_uri, options, (err, client) => {
     router.post(
       "/image",
       // (req, res, next) => checkAdmin(req, res, next, db),
-      fileMiddleware,
       (req, res, next) => adminController.uploadImage(req, res, next, db)
     );
   }

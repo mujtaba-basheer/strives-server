@@ -13,7 +13,7 @@ const uploadFile = (type, file, fileName) =>
     const params = {
       Bucket: process.env.S3_BUCKET,
       Key: `assets/${fileName}`,
-      Body: file,
+      Body: Buffer.from(file, "base64"),
       ACL: "public-read",
       ContentType: `${type}`,
     };
