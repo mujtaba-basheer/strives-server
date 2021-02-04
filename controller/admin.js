@@ -62,6 +62,10 @@ exports.addCategory = asyncHandler(async (req, res, next, db) => {
   const data = Object.assign({}, req.body);
 
   try {
+    // converting sub-categories id to ObjectID type
+    for (let i = 0; i < data.sub_categories.length; i++)
+      data.sub_categories[i]["_id"] = ObjectID(data.sub_categories[i]["_id"]);
+
     // inserting category
     await db.collection("categories").insertOne(data);
 
@@ -87,7 +91,7 @@ exports.getCategory = asyncHandler(async (req, res, next, db) => {
     });
   } catch (error) {
     console.error(error);
-    return next(new AppError("Error adding category", 500));
+    return next(new AppError("Error fetching category", 500));
   }
 });
 
@@ -103,7 +107,7 @@ exports.getCategories = asyncHandler(async (req, res, next, db) => {
     });
   } catch (error) {
     console.error(error);
-    return next(new AppError("Error adding category", 500));
+    return next(new AppError("Error fetching categories", 500));
   }
 });
 
@@ -383,5 +387,71 @@ exports.uploadImage = asyncHandler(async (req, res, next, db) => {
   } catch (error) {
     console.error(error);
     return next(new AppError("Error", 503));
+  }
+});
+
+exports.addProduct = asyncHandler(async (req, res, next, db) => {
+  const data = Object.assign({}, req.body);
+
+  try {
+    data.category = ObjectID(data.category);
+
+    if (process.env.NODE_ENV === "development")
+      console.log("Uploading Main Images...");
+    for (let i = 0; i < data.gallery.main.length; i++) {
+      try {
+        const { mimeType, data: base64data, extension } = data.gallery.main[i];
+        const fileName = uuid() + extension;
+
+        const res3 = await uploadFile(mimeType, base64data, fileName);
+        const { Location, ETag, Key } = res3;
+
+        data.gallery.main[i].src = Location;
+        data.gallery.main[i].details = { ETag, Key };
+
+        delete data.gallery.main[i].data;
+
+        if (process.env.NODE_ENV === "development")
+          console.log(`Uploaded [${i + 1}/${data.gallery.main.length}]`);
+      } catch (error) {
+        console.error(error);
+        console.log(`Error @ gallery.main[${i}]: ${error.message}.`);
+      }
+    }
+
+    if (process.env.NODE_ENV === "development")
+      console.log("Uploading Thumbnail Images...");
+    for (let i = 0; i < data.gallery.small.length; i++) {
+      try {
+        const { mimeType, data: base64data, extension } = data.gallery.small[i];
+        const fileName = uuid() + extension;
+
+        const res3 = await uploadFile(mimeType, base64data, fileName);
+        const { Location, ETag, Key } = res3;
+
+        data.gallery.small[i].src = Location;
+        data.gallery.small[i].details = { ETag, Key };
+
+        delete data.gallery.small[i].data;
+
+        if (process.env.NODE_ENV === "development")
+          console.log(`Uploaded [${i + 1}/${data.gallery.small.length}]`);
+      } catch (error) {
+        console.error(error);
+        console.log(`Error @ gallery.small[${i}]: ${error.message}.`);
+      }
+    }
+
+    data.date = new Date().toISOString();
+
+    await db.collection("products").insertOne(data);
+
+    res.status(200).json({
+      status: true,
+      message: "Product Added Successfully.",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error Adding Product", 502));
   }
 });

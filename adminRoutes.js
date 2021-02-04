@@ -49,23 +49,29 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => checkAdmin(req, res, next, db),
       (req, res, next) => adminController.addCategory(req, res, next, db)
     );
-    // get sub-categories
+    // get categories
     router.get(
-      "/sub-categories",
+      "/categories",
       (req, res, next) => checkAdmin(req, res, next, db),
-      (req, res, next) => adminController.getSubCategories(req, res, next, db)
+      (req, res, next) => adminController.getCategories(req, res, next, db)
     );
-    // delete sub-category
+    // get category by id
+    router.get(
+      "/category/:id",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.getCategory(req, res, next, db)
+    );
+    // delete category
     router.delete(
-      "/sub-category/:id",
+      "/category/:id",
       (req, res, next) => checkAdmin(req, res, next, db),
-      (req, res, next) => adminController.deleteSubCategory(req, res, next, db)
+      (req, res, next) => adminController.deleteCategory(req, res, next, db)
     );
-    // update sub-category
+    // update category
     router.put(
-      "/sub-category/:id",
+      "/category/:id",
       (req, res, next) => checkAdmin(req, res, next, db),
-      (req, res, next) => adminController.updateSubCategory(req, res, next, db)
+      (req, res, next) => adminController.updateCategory(req, res, next, db)
     );
 
     /* ----------- Tags Routes ----------- */
@@ -124,6 +130,12 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => checkAdmin(req, res, next, db),
       (req, res, next) => adminController.getSubCategories(req, res, next, db)
     );
+    // get sub-category
+    router.get(
+      "/sub-category/:id",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.getSubCategory(req, res, next, db)
+    );
     // delete sub-category
     router.delete(
       "/sub-category/:id",
@@ -138,10 +150,17 @@ MongoClient.connect(db_uri, options, (err, client) => {
     );
 
     /* ----------- Product Routes ----------- */
+
     router.post(
       "/image",
       // (req, res, next) => checkAdmin(req, res, next, db),
       (req, res, next) => adminController.uploadImage(req, res, next, db)
+    );
+
+    router.post(
+      "/product",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.addProduct(req, res, next, db)
     );
   }
 });

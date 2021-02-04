@@ -22,10 +22,7 @@ const uploadFile = (type, file, fileName) =>
       if (err) {
         console.error(err);
         reject(null);
-      } else {
-        console.log("Image successfully uploaded.");
-        resolve(datas);
-      }
+      } else resolve(datas);
     });
   });
 

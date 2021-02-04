@@ -8,6 +8,7 @@ require("colors");
 const authController = require("./controller/auth");
 const userController = require("./controller/user");
 const orderController = require("./controller/order");
+const productController = require("./controller/product");
 
 // importing middleware
 const { protect } = require("./middleware/auth");
@@ -111,6 +112,12 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => protect(req, res, next, db),
       (req, res, next) =>
         orderController.createRazorpayOrder(req, res, next, db)
+    );
+
+    /* ----------- Product Routes ----------- */
+
+    router.get("/products", (req, res, next) =>
+      productController.getProducts(req, res, next, db)
     );
 
     /* ----------- Action Routes ----------- */
