@@ -120,6 +120,67 @@ MongoClient.connect(db_uri, options, (err, client) => {
       productController.getProducts(req, res, next, db)
     );
 
+    /* ----------- Favourite Routes ----------- */
+
+    router.get(
+      "/favourites",
+      (req, res, next) => protect(req, res, next, db),
+      (req, res, next) => productController.getFavourites(req, res, next, db)
+    );
+
+    router.put(
+      "/favourites-product/:id",
+      (req, res, next) => protect(req, res, next, db),
+      (req, res, next) =>
+        productController.addProductToFavourites(req, res, next, db)
+    );
+
+    router.delete(
+      "/favourites-product/:id",
+      (req, res, next) => protect(req, res, next, db),
+      (req, res, next) =>
+        productController.removeProductFromFavourites(req, res, next, db)
+    );
+
+    router.delete(
+      "/favourites",
+      (req, res, next) => protect(req, res, next, db),
+      (req, res, next) => productController.clearFavourites(req, res, next, db)
+    );
+
+    /* ----------- Cart Routes ----------- */
+
+    router.get(
+      "/cart",
+      (req, res, next) => protect(req, res, next, db),
+      (req, res, next) => productController.getCart(req, res, next, db)
+    );
+
+    router.put(
+      "/cart-product",
+      (req, res, next) => protect(req, res, next, db),
+      (req, res, next) => productController.addProductToCart(req, res, next, db)
+    );
+
+    router.delete(
+      "/cart-product/:id",
+      (req, res, next) => protect(req, res, next, db),
+      (req, res, next) =>
+        productController.removeProductFromCart(req, res, next, db)
+    );
+
+    router.put(
+      "/cart",
+      (req, res, next) => protect(req, res, next, db),
+      (req, res, next) => productController.updateCart(req, res, next, db)
+    );
+
+    router.delete(
+      "/cart",
+      (req, res, next) => protect(req, res, next, db),
+      (req, res, next) => productController.clearCart(req, res, next, db)
+    );
+
     /* ----------- Action Routes ----------- */
     router.get("/kill", (req, res) => {
       console.log(`closing database connection...`.yellow);
