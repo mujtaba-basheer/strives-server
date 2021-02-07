@@ -7,7 +7,8 @@ const AppError = require("../utils/appError");
 // get products with given queries
 exports.getProducts = asyncHandler(async (req, res, next, db) => {
   const queryObj = Object.assign({}, req.query),
-    filterObj = {};
+    filterObj = {},
+    sortObj = {};
 
   // category
   if (queryObj.category) filterObj.category = ObjectID(queryObj.category);
@@ -36,6 +37,12 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
     else filterObj.sp = { $lte: Number(queryObj.max) };
   }
 
+  // sort
+  if (queryObj.sort) {
+    const [field, order] = queryObj.sort;
+    sortObj[field] = Number(order);
+  }
+
   try {
     const products = await db
       .collection("products")
@@ -52,6 +59,7 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
         "gallery.small.type": 0,
         "gallery.small.details": 0,
       })
+      .sort(sortObj)
       .toArray();
 
     res.status(200).json({
