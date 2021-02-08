@@ -72,6 +72,23 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
   }
 });
 
+// get product with given id
+exports.getProduct = asyncHandler(async (req, res, next, db) => {
+  const productId = ObjectID(req.params.id);
+
+  try {
+    const product = await db.collection("products").findOne({ _id: productId });
+
+    res.status(200).json({
+      status: true,
+      data: product,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error fetching product", 503));
+  }
+});
+
 /* ----------- Favourites ----------- */
 
 exports.getFavourites = asyncHandler(async (req, res, next, db) => {

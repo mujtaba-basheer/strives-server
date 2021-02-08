@@ -119,6 +119,9 @@ MongoClient.connect(db_uri, options, (err, client) => {
     router.get("/products", (req, res, next) =>
       productController.getProducts(req, res, next, db)
     );
+    router.get("/product/:id", (req, res, next) =>
+      productController.getProduct(req, res, next, db)
+    );
 
     /* ----------- Favourite Routes ----------- */
 
