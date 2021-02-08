@@ -83,11 +83,13 @@ exports.addCategory = asyncHandler(async (req, res, next, db) => {
 exports.getCategory = asyncHandler(async (req, res, next, db) => {
   try {
     // getting category
-    await db.collection("categories").findOne({ _id: ObjectID(req.params.id) });
+    const category = await db
+      .collection("categories")
+      .findOne({ _id: ObjectID(req.params.id) });
 
     res.status(200).json({
       status: true,
-      message: "Category Added Successfully",
+      data: category,
     });
   } catch (error) {
     console.error(error);
