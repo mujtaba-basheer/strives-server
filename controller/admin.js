@@ -95,6 +95,7 @@ exports.getCategory = asyncHandler(async (req, res, next, db) => {
   }
 });
 
+// get categories
 exports.getCategories = asyncHandler(async (req, res, next, db) => {
   try {
     // getting categories
@@ -103,7 +104,6 @@ exports.getCategories = asyncHandler(async (req, res, next, db) => {
     res.status(200).json({
       status: true,
       data: categories,
-      message: "Category Added Successfully",
     });
   } catch (error) {
     console.error(error);
