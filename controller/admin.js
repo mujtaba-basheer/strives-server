@@ -113,20 +113,27 @@ exports.getCategories = asyncHandler(async (req, res, next, db) => {
   }
 });
 
+// update category
 exports.updateCategory = asyncHandler(async (req, res, next, db) => {
+  const data = Object.assign({}, req.body);
+
   try {
+    // converting sub-categories id to ObjectID type
+    for (let i = 0; i < data.sub_categories.length; i++)
+      data.sub_categories[i]["_id"] = ObjectID(data.sub_categories[i]["_id"]);
+
     // updating category
     await db
       .collection("categories")
-      .updateOne({ _id: ObjectID(req.params.id) });
+      .updateOne({ _id: ObjectID(req.params.id) }, { $set: data });
 
     res.status(200).json({
       status: true,
-      message: "Category Added Successfully",
+      message: "Category Updated Successfully",
     });
   } catch (error) {
     console.error(error);
-    return next(new AppError("Error adding category", 500));
+    return next(new AppError("Error updating category", 500));
   }
 });
 
