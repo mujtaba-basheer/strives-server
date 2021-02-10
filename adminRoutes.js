@@ -162,6 +162,11 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => checkAdmin(req, res, next, db),
       (req, res, next) => adminController.addProduct(req, res, next, db)
     );
+    router.get(
+      "/products",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.getProducts(req, res, next, db)
+    );
   }
 });
 

@@ -399,6 +399,42 @@ exports.uploadImage = asyncHandler(async (req, res, next, db) => {
   }
 });
 
+// get all products
+exports.getProducts = asyncHandler(async (req, res, next, db) => {
+  try {
+    const products = await db
+      .collection("products")
+      .aggregate([
+        {
+          $lookup: {
+            from: "categories",
+            as: "category",
+            let: { categoryId: "$category" },
+            pipeline: [
+              {
+                $match: { $expr: { $eq: ["$_id", "$$categoryId"] } },
+              },
+              {
+                $project: {
+                  name: 1,
+                },
+              },
+            ],
+          },
+        },
+      ])
+      .toArray();
+
+    res.status(200).json({
+      status: true,
+      data: products,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error fetching products", 503));
+  }
+});
+
 exports.addProduct = asyncHandler(async (req, res, next, db) => {
   const data = Object.assign({}, req.body);
 
