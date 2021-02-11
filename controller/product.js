@@ -225,7 +225,11 @@ exports.getCart = asyncHandler(async (req, res, next, db) => {
           $lookup: {
             from: "products",
             as: "products",
-            let: { productId: "$carts.product_id", qty: "$carts.quantity" },
+            let: {
+              productId: "$carts.product_id",
+              qty: "$carts.quantity",
+              size_val: "$carts.size",
+            },
             pipeline: [
               { $match: { $expr: { $eq: ["$_id", "$$productId"] } } },
               {
@@ -242,6 +246,7 @@ exports.getCart = asyncHandler(async (req, res, next, db) => {
               {
                 $set: {
                   quantity: "$$qty",
+                  size: "$$size_val",
                 },
               },
             ],
@@ -264,18 +269,20 @@ exports.getCart = asyncHandler(async (req, res, next, db) => {
 
 exports.addProductToCart = asyncHandler(async (req, res, next, db) => {
   const userId = ObjectID(req.user["_id"]);
-  const { productId, quantity } = req.body;
+  const { productId, quantity, size } = req.body;
 
   try {
     const itemObj = {
       product_id: ObjectID(productId),
       quantity: quantity || 1,
+      size,
     };
 
     const cart = await db.collection("carts").findOne({ user_id: userId });
 
     const index = cart.carts.findIndex(
-      ({ product_id }) => product_id.toString() === productId
+      ({ product_id, size: size_val }) =>
+        product_id.toString() === productId && size_val === size
     );
 
     if (index === -1)
@@ -338,6 +345,7 @@ exports.updateCart = asyncHandler(async (req, res, next, db) => {
       cart.push({
         product_id: ObjectID(item["_id"]),
         quantity: (item.quantity && Number(item.quantity)) || 1,
+        size: item.size,
       });
 
     await db.collection("carts").updateOne(
