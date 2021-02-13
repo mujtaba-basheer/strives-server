@@ -125,11 +125,11 @@ exports.checkCoupon = asyncHandler(async (req, res, next, db) => {
 
             // checking for coupon validity
             if (todays_date <= expiry_date) {
-              const { discount_type, amount, _id, name } = coupon;
+              const { discount_type, amount, _id, name, slug_name } = coupon;
 
               res.status(200).json({
                 status: true,
-                data: { discount_type, amount, _id, name },
+                data: { discount_type, amount, _id, name, slug_name },
                 message: "Coupon Applied Successfully",
               });
             } else return next(new AppError(`Coupon expired`, 406));
