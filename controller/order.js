@@ -3,6 +3,13 @@ const Razorpay = require("razorpay");
 const uuid = require("uuid");
 const asyncHandler = require("express-async-handler");
 const AppError = require("../utils/appError");
+const slugify = require("slugify");
+const slugOptions = {
+  replacement: "-",
+  lower: true,
+};
+
+/* ----------- Razorpay ----------- */
 
 // get razorpay credentials
 exports.getCredentials = asyncHandler(async (req, res, next, db) => {
@@ -58,5 +65,98 @@ exports.createRazorpayOrder = asyncHandler(async (req, res, next, db) => {
   } catch (error) {
     console.error(error);
     return next(new AppError("Server Error", 501));
+  }
+});
+
+/* ----------- Coupon ----------- */
+
+exports.useCoupon = asyncHandler(async (req, res, next, db) => {
+  const userId = ObjectID(req.user["_id"]);
+  const couponCode = slugify(req.params.code);
+
+  try {
+    await db.collection("coupons").updateOne(
+      { slug_name: slugify(couponCode, slugOptions) },
+      {
+        $push: {
+          users_used: userId,
+        },
+        $inc: { usage_count: 1 },
+      }
+    );
+
+    res.status(200).json({
+      status: true,
+      message: "Coupon applied successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error Applying Coupon", 503));
+  }
+});
+
+// check if coupon can be applied for a given order by given user
+exports.checkCoupon = asyncHandler(async (req, res, next, db) => {
+  const userId = ObjectID(req.user["_id"]),
+    { coupon_code, amount } = req.body;
+
+  try {
+    const coupon = await db
+      .collection("coupons")
+      .findOne({ slug_name: slugify(coupon_code, slugOptions) });
+
+    // checking if coupon exists
+    if (coupon) {
+      // checking for minimum  spend
+      if (Number(amount) >= coupon.min_spend) {
+        // checking coupon limit
+        if (coupon.usage_count < coupon.limit_per_coupon) {
+          const { users_used, limit_per_user } = coupon;
+          let use_count = 0;
+
+          for (let user of users_used)
+            if (user.toString() === userId.toString()) use_count++;
+
+          // checking coupon limit for user
+          if (use_count < limit_per_user) {
+            const todays_date = new Date(),
+              { expiry_date: expiry_date_str } = coupon;
+            const expiry_date = new Date(expiry_date_str);
+
+            // checking for coupon validity
+            if (todays_date <= expiry_date) {
+              const { discount_type, amount, _id, name } = coupon;
+
+              res.status(200).json({
+                status: true,
+                data: { discount_type, amount, _id, name },
+                message: "Coupon Applied Successfully",
+              });
+            } else return next(new AppError(`Coupon expired`, 406));
+          } else
+            return next(
+              new AppError(
+                `Coupon use limit of ${limit_per_user} times reached`,
+                402
+              )
+            );
+        } else
+          return next(
+            new AppError(
+              `Maximum coupon limit of ${coupon.limit_per_coupon} for users reached`,
+              402
+            )
+          );
+      } else
+        return next(
+          new AppError(
+            `Minimum cart value should be ₹ ${coupon.min_spend}.`,
+            404
+          )
+        );
+    } else return next(new AppError("Coupon Not Found", 404));
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error applying coupon", 502));
   }
 });

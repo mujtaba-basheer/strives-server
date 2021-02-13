@@ -435,6 +435,7 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
   }
 });
 
+// all product
 exports.addProduct = asyncHandler(async (req, res, next, db) => {
   const data = Object.assign({}, req.body);
 
@@ -498,5 +499,84 @@ exports.addProduct = asyncHandler(async (req, res, next, db) => {
   } catch (error) {
     console.error(error);
     return next(new AppError("Error Adding Product", 502));
+  }
+});
+
+/* ----------- Coupon ----------- */
+
+// add coupon
+exports.addCoupon = asyncHandler(async (req, res, next, db) => {
+  const data = Object.assign({}, req.body);
+  data.valid_category.forEach((cat_id) => {
+    cat_id = ObjectID(cat_id);
+  });
+  data.slug_name = slugify(data.name, slugOptions);
+
+  try {
+    await db.collection("coupons").insertOne(data);
+
+    res.status(200).json({
+      status: true,
+      message: "Coupon added successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error Adding Coupon", 400));
+  }
+});
+
+// get coupons
+exports.getCoupons = asyncHandler(async (req, res, next, db) => {
+  try {
+    const coupons = await db.collection("coupons").find().toArray();
+
+    res.status(200).json({
+      status: true,
+      data: coupons,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error Fetching Coupon", 400));
+  }
+});
+
+// edit coupon
+exports.updateCoupon = asyncHandler(async (req, res, next, db) => {
+  const couponId = ObjectID(req.params.id);
+  const data = Object.assign({}, req.body);
+
+  try {
+    // typecasting category ids from string to ObjectID
+    data.valid_category = data.valid_category.map((id) => ObjectID(id));
+
+    // typecasting user ids from string to ObjectID
+    data.users_used = data.users_used.map((id) => ObjectID(id));
+
+    await db.collection("coupons").updateOne({ _id: couponId }, { $set: data });
+
+    res.status(200).json({
+      status: true,
+      message: "Coupon deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error Deleting Coupon", 400));
+  }
+});
+
+// delete coupon
+exports.deleteCoupon = asyncHandler(async (req, res, next, db) => {
+  const couponId = ObjectID(req.params.id);
+
+  try {
+    await db.collection("coupons").deleteOne({ _id: couponId });
+
+    res.status(200).json({
+      status: true,
+      message: "Coupon deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error Deleting Coupon", 400));
   }
 });

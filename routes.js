@@ -184,6 +184,19 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => productController.clearCart(req, res, next, db)
     );
 
+    /* ----------- Order Routes ----------- */
+
+    router.get(
+      "/apply-coupon/:code",
+      (req, res, next) => protect(req, res, next, db),
+      (req, res, next) => orderController.useCoupon(req, res, next, db)
+    );
+    router.post(
+      "/check-coupon",
+      (req, res, next) => protect(req, res, next, db),
+      (req, res, next) => orderController.checkCoupon(req, res, next, db)
+    );
+
     /* ----------- Action Routes ----------- */
     router.get("/kill", (req, res) => {
       console.log(`closing database connection...`.yellow);

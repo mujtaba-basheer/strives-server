@@ -167,6 +167,29 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => checkAdmin(req, res, next, db),
       (req, res, next) => adminController.getProducts(req, res, next, db)
     );
+
+    /* ----------- Coupon ----------- */
+
+    router.post(
+      "/coupon",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.addCoupon(req, res, next, db)
+    );
+    router.get(
+      "/coupons",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.getCoupons(req, res, next, db)
+    );
+    router.put(
+      "/coupon/:id",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.updateCoupon(req, res, next, db)
+    );
+    router.delete(
+      "/coupon/:id",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.deleteCoupon(req, res, next, db)
+    );
   }
 });
 
