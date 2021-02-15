@@ -149,13 +149,20 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => adminController.updateSubCategory(req, res, next, db)
     );
 
-    /* ----------- Product Routes ----------- */
+    /* ----------- Assets Routes ----------- */
 
     router.post(
       "/image",
       // (req, res, next) => checkAdmin(req, res, next, db),
       (req, res, next) => adminController.uploadImage(req, res, next, db)
     );
+    router.get(
+      "/images",
+      // (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.getImages(req, res, next, db)
+    );
+
+    /* ----------- Product Routes ----------- */
 
     router.post(
       "/product",

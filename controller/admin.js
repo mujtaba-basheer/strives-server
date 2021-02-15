@@ -384,20 +384,52 @@ exports.getColours = asyncHandler(async (req, res, next, db) => {
   }
 });
 
-/* ----------- Product ----------- */
+/* ----------- Assets ----------- */
 
 exports.uploadImage = asyncHandler(async (req, res, next, db) => {
   try {
-    const { mimeType, base64, extension } = req.body;
+    const { mimeType, base64, extension, size } = req.body;
     const fileName = uuid() + extension;
 
     const resS3 = await uploadFile(mimeType, base64, fileName);
-    res.send(resS3);
+    const { ETag, Key, Location } = resS3;
+
+    await db.collection("images").insertOne({
+      name: fileName,
+      src: Location,
+      details: {
+        key: Key,
+        size,
+        eTag: ETag,
+      },
+    });
+
+    res.status(200).json({
+      status: true,
+      message: "Image Uploaded Successfully",
+      data: Location,
+    });
   } catch (error) {
     console.error(error);
-    return next(new AppError("Error", 503));
+    return next(new AppError("Error Uploading File", 503));
   }
 });
+
+exports.getImages = asyncHandler(async (req, res, next, db) => {
+  try {
+    const images = await db.collection("images").find().toArray();
+
+    res.status(200).json({
+      status: true,
+      data: images,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error fetching images", 404));
+  }
+});
+
+/* ----------- Product ----------- */
 
 // get all products
 exports.getProducts = asyncHandler(async (req, res, next, db) => {
