@@ -11,7 +11,7 @@ const orderController = require("./controller/order");
 const productController = require("./controller/product");
 
 // importing middleware
-const { protect } = require("./middleware/auth");
+const { protect, checkUser } = require("./middleware/auth");
 
 // getting db uri
 const db_uri = process.env.DB_URI.replace(
@@ -102,16 +102,11 @@ MongoClient.connect(db_uri, options, (err, client) => {
 
     /* ----------- Order Routes ----------- */
 
-    router.get(
-      "/credentials",
-      (req, res, next) => protect(req, res, next, db),
-      (req, res, next) => orderController.getCredentials(req, res, next, db)
+    router.get("/credentials", (req, res, next) =>
+      orderController.getCredentials(req, res, next, db)
     );
-    router.post(
-      "/razorpay-order",
-      (req, res, next) => protect(req, res, next, db),
-      (req, res, next) =>
-        orderController.createRazorpayOrder(req, res, next, db)
+    router.post("/razorpay-order", (req, res, next) =>
+      orderController.createRazorpayOrder(req, res, next, db)
     );
 
     /* ----------- Product Routes ----------- */
@@ -184,7 +179,7 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => productController.clearCart(req, res, next, db)
     );
 
-    /* ----------- Order Routes ----------- */
+    /* ----------- Coupon Routes ----------- */
 
     router.get(
       "/apply-coupon/:code",
@@ -193,7 +188,7 @@ MongoClient.connect(db_uri, options, (err, client) => {
     );
     router.post(
       "/check-coupon",
-      (req, res, next) => protect(req, res, next, db),
+      (req, res, next) => checkUser(req, res, next, db),
       (req, res, next) => orderController.checkCoupon(req, res, next, db)
     );
 

@@ -97,7 +97,7 @@ exports.useCoupon = asyncHandler(async (req, res, next, db) => {
 
 // check if coupon can be applied for a given order by given user
 exports.checkCoupon = asyncHandler(async (req, res, next, db) => {
-  const userId = ObjectID(req.user["_id"]),
+  const userId = req.user ? ObjectID(req.user["_id"]) : "Guest",
     { coupon_code, amount } = req.body;
 
   try {
