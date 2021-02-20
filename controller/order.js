@@ -43,7 +43,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res, next, db) => {
 
     // order options
     const options = {
-      amount,
+      amount: 100,
       currency: "INR",
       receipt: uuid(),
     };
