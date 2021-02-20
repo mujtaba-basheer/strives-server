@@ -34,12 +34,11 @@ exports.createRazorpayOrder = asyncHandler(async (req, res, next, db) => {
 
   try {
     // extracting credentials from environment variables
-    const { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } = process.env;
+    const { RAZORPAY_KEY_ID } = process.env;
 
     // creating Razorpay instance
     const razorpay = new Razorpay({
       key_id: RAZORPAY_KEY_ID,
-      key_secret: RAZORPAY_KEY_SECRET,
     });
 
     // order options
@@ -65,6 +64,44 @@ exports.createRazorpayOrder = asyncHandler(async (req, res, next, db) => {
   } catch (error) {
     console.error(error);
     return next(new AppError("Server Error", 501));
+  }
+});
+
+/* ----------- Order ----------- */
+
+exports.placeOrder = asyncHandler(async (req, res, next, db) => {
+  const data = Object.assign({}, req.body),
+    userId = req.user ? ObjectID(req.user["_id"]) : "Guest";
+
+  // TODO: Sent SMS/email when order is placed
+
+  try {
+    for (let item of data.items) {
+      item["_id"] = ObjectID(item["_id"]);
+      item.mp = Number(item.mp);
+      item.sp = Number(item.sp);
+      item.qty = Number(item.qty);
+    }
+
+    if (data.coupon) data.coupon["_id"] = ObjectID(data.coupon["_id"]);
+
+    data.isDelivered = false;
+    data.deliveredOn = "";
+    data.user = userId;
+    data.time = new Date();
+    data.totalMP = Number(data.totalMP);
+    data.totalSP = Number(data.totalSP);
+    data.status = "placed";
+
+    await db.collection("orders").insertOne(data);
+
+    res.status(200).json({
+      status: true,
+      message: "Order Placed Successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Oops! Error Placing Order.", 502));
   }
 });
 
