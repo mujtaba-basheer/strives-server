@@ -15,10 +15,9 @@ const slugOptions = {
 exports.getCredentials = asyncHandler(async (req, res, next, db) => {
   try {
     // extracting credentials from environment variables
-    const { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } = process.env;
+    const { RAZORPAY_KEY_ID } = process.env;
     const credentials = {
       key_id: RAZORPAY_KEY_ID,
-      key_secret: RAZORPAY_KEY_SECRET,
     };
 
     res.status(200).json(credentials);
@@ -34,11 +33,12 @@ exports.createRazorpayOrder = asyncHandler(async (req, res, next, db) => {
 
   try {
     // extracting credentials from environment variables
-    const { RAZORPAY_KEY_ID } = process.env;
+    const { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } = process.env;
 
     // creating Razorpay instance
     const razorpay = new Razorpay({
       key_id: RAZORPAY_KEY_ID,
+      key_secret: RAZORPAY_KEY_SECRET,
     });
 
     // order options
