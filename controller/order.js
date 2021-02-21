@@ -43,6 +43,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res, next, db) => {
 
     // order options
     const options = {
+      // TODO: remove hardcoded amount
       amount: 100,
       currency: "INR",
       receipt: uuid(),
@@ -78,9 +79,9 @@ exports.placeOrder = asyncHandler(async (req, res, next, db) => {
   try {
     for (let item of data.items) {
       item["_id"] = ObjectID(item["_id"]);
-      item.mp = Number(item.mp);
+      item.mrp = Number(item.mrp);
       item.sp = Number(item.sp);
-      item.qty = Number(item.qty);
+      item.quantity = Number(item.quantity);
     }
 
     if (data.coupon) data.coupon["_id"] = ObjectID(data.coupon["_id"]);
