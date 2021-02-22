@@ -1,7 +1,7 @@
 const { ObjectID } = require("mongodb");
 const uuid = require("uuid");
 const asyncHandler = require("express-async-handler");
-const uploadFile = require("../utils/uploadFile");
+const { uploadFile, deleteAsset } = require("../utils/s3Utils");
 const authUtil = require("../utils/auth");
 const AppError = require("../utils/appError");
 const slugify = require("slugify");
@@ -412,6 +412,25 @@ exports.uploadImage = asyncHandler(async (req, res, next, db) => {
   } catch (error) {
     console.error(error);
     return next(new AppError("Error Uploading File", 503));
+  }
+});
+
+exports.deleteImage = asyncHandler(async (req, res, next, db) => {
+  const { id } = req.params;
+  try {
+    const imgObj = await db.collection("images").findOne({ _id: ObjectID(id) });
+
+    await deleteAsset(imgObj.details.key);
+
+    await db.collection("images").deleteOne({ _id: ObjectID(id) });
+
+    res.status(200).json({
+      status: true,
+      message: "Image Deleted Successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error Deleting Image", 503));
   }
 });
 

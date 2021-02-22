@@ -26,4 +26,20 @@ const uploadFile = (type, file, fileName) =>
     });
   });
 
-module.exports = uploadFile;
+const deleteAsset = (key) =>
+  new Promise((resolve, reject) => {
+    const params = {
+      Bucket: process.env.S3_BUCKET,
+      Key: key,
+    };
+
+    s3.deleteObject(params, (err, data) => {
+      if (err) reject(err);
+      else {
+        console.log(data);
+        resolve(data);
+      }
+    });
+  });
+
+module.exports = { uploadFile, deleteAsset };
