@@ -108,8 +108,15 @@ MongoClient.connect(db_uri, options, (err, client) => {
     router.post("/razorpay-order", (req, res, next) =>
       orderController.createRazorpayOrder(req, res, next, db)
     );
-    router.post("/order", (req, res, next) =>
-      orderController.placeOrder(req, res, next, db)
+    router.post(
+      "/order",
+      (req, res, next) => checkUser(req, res, next, db),
+      (req, res, next) => orderController.placeOrder(req, res, next, db)
+    );
+    router.get(
+      "/orders",
+      (req, res, next) => checkUser(req, res, next, db),
+      (req, res, next) => userController.getOrders(req, res, next, db)
     );
 
     /* ----------- Product Routes ----------- */

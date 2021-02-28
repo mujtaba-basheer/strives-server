@@ -143,3 +143,28 @@ exports.getAddress = asyncHandler(async (req, res, next, db) => {
     return next(new AppError("Error Fetching Address", 400));
   }
 });
+
+/* ----------- Orders ----------- */
+
+exports.getOrders = asyncHandler(async (req, res, next, db) => {
+  const userId = req.user ? req.user["_id"] : null;
+
+  try {
+    // checking for user
+    if (!userId) return next(new AppError("User Not Found", 404));
+
+    // fetching orders
+    const orders = await db
+      .collection("orders")
+      .find({ user: ObjectID(userId) })
+      .toArray();
+
+    res.status(200).json({
+      status: true,
+      data: orders,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error Fetching Orders", 400));
+  }
+});
