@@ -643,8 +643,9 @@ exports.getOrders = asyncHandler(async (req, res, next, db) => {
       .sort({ time: -1 })
       .project({
         userDetails: 0,
-        items: 0,
+        totalMP: 0,
         paymentDetails: 0,
+        user: 0,
       })
       .toArray();
 
