@@ -486,7 +486,7 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
   }
 });
 
-// all product
+// add product
 exports.addProduct = asyncHandler(async (req, res, next, db) => {
   const data = Object.assign({}, req.body);
 
@@ -629,5 +629,31 @@ exports.deleteCoupon = asyncHandler(async (req, res, next, db) => {
   } catch (error) {
     console.error(error);
     return next(new AppError("Error Deleting Coupon", 400));
+  }
+});
+
+/* ----------- Order ----------- */
+
+// get orders
+exports.getOrders = asyncHandler(async (req, res, next, db) => {
+  try {
+    const orders = await db
+      .collection("orders")
+      .find()
+      .sort({ time: -1 })
+      .project({
+        userDetails: 0,
+        items: 0,
+        paymentDetails: 0,
+      })
+      .toArray();
+
+    res.status(200).json({
+      status: true,
+      data: orders,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error Fetching Orders", 400));
   }
 });

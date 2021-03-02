@@ -202,6 +202,14 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => checkAdmin(req, res, next, db),
       (req, res, next) => adminController.deleteCoupon(req, res, next, db)
     );
+
+    /* ----------- Order Routes ----------- */
+
+    router.get(
+      "/orders",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.getOrders(req, res, next, db)
+    );
   }
 });
 
