@@ -95,6 +95,27 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => adminController.deleteTag(req, res, next, db)
     );
 
+    /* ----------- Materials Routes ----------- */
+
+    // add material
+    router.post(
+      "/material",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.addMaterial(req, res, next, db)
+    );
+    // get materials
+    router.get(
+      "/materials",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.getMaterials(req, res, next, db)
+    );
+    // delete material
+    router.delete(
+      "/material/:id",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.deleteMaterial(req, res, next, db)
+    );
+
     /* ----------- Colours Routes ----------- */
 
     // add colour

@@ -384,6 +384,69 @@ exports.getColours = asyncHandler(async (req, res, next, db) => {
   }
 });
 
+/* ----------- Materials ----------- */
+
+exports.addMaterial = asyncHandler(async (req, res, next, db) => {
+  const { name } = req.body;
+  const slug_name = slugify(name, slugOptions);
+
+  try {
+    // fetching material if present
+    const materialDoc = await db.collection("materials").findOne({ slug_name });
+
+    // checking if material already exists
+    if (!materialDoc) {
+      // adding material
+      await db.collection("materials").insertOne({ name, slug_name });
+
+      res.status(200).json({
+        status: true,
+        message: "Material Added Successfully",
+      });
+    } else return next(new AppError("Material already exists", 401));
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error adding material", 500));
+  }
+});
+
+exports.deleteMaterial = asyncHandler(async (req, res, next, db) => {
+  try {
+    // deleting colour
+    await db
+      .collection("materials")
+      .deleteOne({ _id: ObjectID(req.params.id) });
+
+    res.status(200).json({
+      status: true,
+      message: "Material Deleted Successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error deleting material", 500));
+  }
+});
+
+exports.getMaterials = asyncHandler(async (req, res, next, db) => {
+  try {
+    // fetching materials
+    const materials = await db
+      .collection("materials")
+      .find()
+      .sort({ full_name: 1 })
+      .toArray();
+
+    res.status(200).json({
+      status: true,
+      data: materials,
+      message: "Materials Fetched Successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error fetching materials.", 500));
+  }
+});
+
 /* ----------- Assets ----------- */
 
 exports.uploadImage = asyncHandler(async (req, res, next, db) => {
