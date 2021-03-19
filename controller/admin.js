@@ -66,6 +66,9 @@ exports.addCategory = asyncHandler(async (req, res, next, db) => {
     for (let i = 0; i < data.sub_categories.length; i++)
       data.sub_categories[i]["_id"] = ObjectID(data.sub_categories[i]["_id"]);
 
+    // adding name slug
+    data.slug_name = slugify(data.name, slugOptions);
+
     // inserting category
     await db.collection("categories").insertOne(data);
 
