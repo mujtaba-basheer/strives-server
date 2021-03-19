@@ -729,3 +729,27 @@ exports.getOrders = asyncHandler(async (req, res, next, db) => {
     return next(new AppError("Error Fetching Orders", 400));
   }
 });
+
+// update order status
+exports.updateOrderStatus = asyncHandler(async (req, res, next, db) => {
+  const { status } = req.body;
+  const { id } = req.params;
+
+  try {
+    await db
+      .collection("orders")
+      .updateOne({ _id: ObjectID(id) }, { $set: { status } });
+
+    if (status === "rejected") {
+      await db.collection("orders").deleteOne({ _id: ObjectID(id) });
+    }
+
+    res.status(200).json({
+      status: true,
+      message: "Status Updated Successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error Updating Status", 400));
+  }
+});

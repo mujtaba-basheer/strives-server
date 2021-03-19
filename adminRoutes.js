@@ -231,6 +231,11 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => checkAdmin(req, res, next, db),
       (req, res, next) => adminController.getOrders(req, res, next, db)
     );
+    router.put(
+      "/order/status/:id",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.updateOrderStatus(req, res, next, db)
+    );
   }
 });
 
