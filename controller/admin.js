@@ -584,6 +584,7 @@ exports.addProduct = asyncHandler(async (req, res, next, db) => {
 
     if (process.env.NODE_ENV === "development")
       console.log("Uploading Thumbnail Images...");
+
     for (let i = 0; i < data.gallery.small.length; i++) {
       try {
         const { mimeType, data: base64data, extension } = data.gallery.small[i];
@@ -605,7 +606,11 @@ exports.addProduct = asyncHandler(async (req, res, next, db) => {
       }
     }
 
+    // adding timestamp
     data.date = new Date().toISOString();
+
+    // adding name-slug
+    data.slug_name = slugify(data.name, slugOptions);
 
     await db.collection("products").insertOne(data);
 
