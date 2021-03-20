@@ -201,6 +201,17 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => checkAdmin(req, res, next, db),
       (req, res, next) => adminController.getProducts(req, res, next, db)
     );
+    router.put(
+      "/product/status/:id",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) =>
+        adminController.blockUnblockProduct(req, res, next, db)
+    );
+    router.delete(
+      "/product/:id",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.deleteProduct(req, res, next, db)
+    );
 
     /* ----------- Coupon ----------- */
 

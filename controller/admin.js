@@ -628,6 +628,43 @@ exports.addProduct = asyncHandler(async (req, res, next, db) => {
   }
 });
 
+// block/unblock product
+exports.blockUnblockProduct = asyncHandler(async (req, res, next, db) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    await db
+      .collection("products")
+      .updateOne({ _id: ObjectID(id) }, { $set: { isBlocked: status } });
+
+    res.json({
+      status: true,
+      message: `Product ${status ? "Unb" : "B"}locked Successfully`,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new Error(`Error ${status ? "Unb" : "B"}locking Product`));
+  }
+});
+
+// deleting product
+exports.deleteProduct = asyncHandler(async (req, res, next, db) => {
+  const { id } = req.params;
+
+  try {
+    await db.collection("products").deleteOne({ _id: ObjectID(id) });
+
+    res.json({
+      status: true,
+      message: "Product Deleted Successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new Error("Error Deleting Product"));
+  }
+});
+
 /* ----------- Coupon ----------- */
 
 // add coupon
