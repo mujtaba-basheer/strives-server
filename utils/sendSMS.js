@@ -9,7 +9,73 @@ AWS.config.update({
   secretAccessKey: process.env.PINPOINT_SECRET_KEY,
 });
 
+const phonebook = [
+  { name: "Mujtaba", phone: "+917686886489" },
+  { name: "Admin", phone: "+917980915048" },
+];
+
+const reference = {
+  maintainer: "+917686886489",
+  admin: "+917980915048",
+  me: "+917686886489",
+};
+
 const pinpoint = new AWS.Pinpoint();
+
+const sendTestSMS = () => {
+  const destinationNumber = reference["maintainer"];
+
+  const params = {
+    ApplicationId: applicationId,
+    MessageRequest: {
+      Addresses: {
+        [destinationNumber]: {
+          ChannelType: "SMS",
+        },
+      },
+      MessageConfiguration: {
+        SMSMessage: {
+          Body: `This is a test message`,
+          MessageType: "TRANSACTIONAL",
+        },
+      },
+    },
+  };
+
+  return new Promise((res, rej) => {
+    pinpoint.sendMessages(params, (err, data) => {
+      if (err) {
+        console.error(err);
+        rej(null);
+      } else res(data.MessageResponse.Result);
+    });
+  });
+};
+
+const notifyError = async (type, details) => {
+  const destinationNumber = reference["maintainer"];
+
+  const params = {
+    ApplicationId: applicationId,
+    MessageRequest: {
+      Addresses: {
+        [destinationNumber]: {
+          ChannelType: "SMS",
+        },
+      },
+      MessageConfiguration: {
+        SMSMessage: {
+          Body: `SMS Sending Error\nTopic: ${type}\nDetails: ${details}`,
+          MessageType: "TRANSACTIONAL",
+        },
+      },
+    },
+  };
+
+  pinpoint.sendMessages(params, (err, data) => {
+    if (err) console.log(err);
+  });
+};
 
 const sendOtp = (destination) => {
   const destinationNumber = destination;
@@ -37,8 +103,10 @@ const sendOtp = (destination) => {
 
   return new Promise((res, rej) => {
     pinpoint.sendMessages(params, (err, data) => {
-      if (err) rej(err);
-      else {
+      if (err) {
+        notifyError("OTP", `User Contact: ${destination}`);
+        rej(err);
+      } else {
         console.log("message sent");
         res({
           otp,
@@ -88,4 +156,112 @@ const sendOrderDetails = (destination) => {
   });
 };
 
-module.exports = { sendOtp };
+const orderPlacedUser = async (user_contact, order_id) => {
+  const message = `Your order has been successfully placed.\nThe Strives`;
+
+  const params = {
+    ApplicationId: applicationId,
+    MessageRequest: {
+      Addresses: {
+        [user_contact]: {
+          ChannelType: "SMS",
+        },
+      },
+      MessageConfiguration: {
+        SMSMessage: {
+          Body: message,
+          MessageType: "TRANSACTIONAL",
+        },
+      },
+    },
+  };
+
+  return new Promise((res, rej) => {
+    pinpoint.sendMessages(params, (err, data) => {
+      if (err) {
+        notifyError("User Order Placed", `Order ID: ${order_id}`);
+        rej(err);
+      } else res(true);
+    });
+  });
+};
+
+const orderConfirmedUser = async (destination, items = [], price, order_id) => {
+  const destinationNumber = "+917686886489" || destination;
+
+  let itemsStr = "";
+  for (let i = 0; i < items.length; i++) {
+    const { name: itemName, qty, size } = items[i];
+    itemsStr += `${i + 1}. ${itemName} - ${
+      size === "C" ? "Custom" : size
+    } - ${qty} Nos.\n`;
+  }
+  let message = `Placed: Order for\n ${itemsStr}\n worth Rs. ${price} is placed & will be delivered within 2 weeks.
+  You will be notified once your order is dispatched.`;
+  const params = {
+    ApplicationId: applicationId,
+    MessageRequest: {
+      Addresses: {
+        [destinationNumber]: {
+          ChannelType: "SMS",
+        },
+      },
+      MessageConfiguration: {
+        SMSMessage: {
+          Body: message,
+          MessageType: "TRANSACTIONAL",
+        },
+      },
+    },
+  };
+
+  return new Promise((res, rej) => {
+    pinpoint.sendMessages(params, (err, data) => {
+      if (err) {
+        notifyError("User Order Confirmation", `Order ID: ${order_id}`);
+        rej(err);
+      } else res(true);
+    });
+  });
+};
+
+const orderPlacedAdmin = async (user_contact, price, order_id) => {
+  const message = `ORDER PLACED\n Order ID: ${order_id}\nValue: ${price}\nContact: ${user_contact}`;
+
+  const params = {
+    ApplicationId: applicationId,
+    MessageRequest: {
+      Addresses: {
+        [reference["admin"]]: {
+          ChannelType: "SMS",
+        },
+        [reference["maintainer"]]: {
+          ChannelType: "SMS",
+        },
+      },
+      MessageConfiguration: {
+        SMSMessage: {
+          Body: message,
+          MessageType: "TRANSACTIONAL",
+        },
+      },
+    },
+  };
+
+  return new Promise((res, rej) => {
+    pinpoint.sendMessages(params, (err, data) => {
+      if (err) {
+        notifyError("Admin Order Placed", `Order ID: ${order_id}`);
+        rej(err);
+      } else res(true);
+    });
+  });
+};
+
+module.exports = {
+  sendOtp,
+  orderConfirmedUser,
+  orderPlacedAdmin,
+  orderPlacedUser,
+  sendTestSMS,
+};

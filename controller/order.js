@@ -3,6 +3,7 @@ const Razorpay = require("razorpay");
 const uuid = require("uuid");
 const asyncHandler = require("express-async-handler");
 const AppError = require("../utils/appError");
+const sendSMS = require("../utils/sendSMS");
 const slugify = require("slugify");
 const slugOptions = {
   replacement: "-",
@@ -72,9 +73,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res, next, db) => {
 
 exports.placeOrder = asyncHandler(async (req, res, next, db) => {
   const data = Object.assign({}, req.body),
-    userId = req.user ? ObjectID(req.user["_id"]) : "Guest";
-
-  // TODO: Sent SMS/email when order is placed
+    userId = req.user ? ObjectID(req.user["_id"]) : "guest";
 
   try {
     for (let item of data.items) {
@@ -92,9 +91,11 @@ exports.placeOrder = asyncHandler(async (req, res, next, db) => {
     data.time = new Date();
     data.totalMP = Number(data.totalMP);
     data.totalSP = Number(data.totalSP);
-    data.status = "placed";
+    data.status = "on-hold";
 
-    await db.collection("orders").insertOne(data);
+    const {
+      ops: [{ _id: order_id }],
+    } = await db.collection("orders").insertOne(data);
 
     res.status(200).json({
       status: true,
@@ -104,6 +105,11 @@ exports.placeOrder = asyncHandler(async (req, res, next, db) => {
     console.error(error);
     return next(new AppError("Oops! Error Placing Order.", 502));
   }
+
+  // send SMS to user
+  try {
+    await sendSMS.orderPlacedUser(data.userDetails.mobile, order_id);
+  } catch (error) {}
 });
 
 /* ----------- Coupon ----------- */

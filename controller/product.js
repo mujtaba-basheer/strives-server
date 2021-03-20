@@ -26,7 +26,7 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
   }
 
   // material
-  if (queryObj.material) filterObj.material = queryObj.material;
+  if (queryObj.material) filterObj.materials = { $all: [queryObj.material] };
 
   // min-price
   if (queryObj.min) filterObj.sp = { $gte: Number(queryObj.min) };

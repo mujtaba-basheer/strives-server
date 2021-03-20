@@ -4,6 +4,7 @@ const asyncHandler = require("express-async-handler");
 const { uploadFile, deleteAsset } = require("../utils/s3Utils");
 const authUtil = require("../utils/auth");
 const AppError = require("../utils/appError");
+const sendSMS = require("../utils/sendSMS");
 const slugify = require("slugify");
 const slugOptions = {
   replacement: "-",
@@ -740,14 +741,39 @@ exports.updateOrderStatus = asyncHandler(async (req, res, next, db) => {
       .collection("orders")
       .updateOne({ _id: ObjectID(id) }, { $set: { status } });
 
-    if (status === "rejected") {
-      await db.collection("orders").deleteOne({ _id: ObjectID(id) });
-    }
-
     res.status(200).json({
       status: true,
       message: "Status Updated Successfully",
     });
+
+    switch (status) {
+      case "rejected":
+        await db.collection("orders").deleteOne({ _id: ObjectID(id) });
+        break;
+      case "confirmed":
+        try {
+          const order = await db
+            .collection("orders")
+            .findOne({ _id: ObjectID(id) });
+          const items = order.items.map(({ name, quantity: qty, size }) => ({
+            name,
+            qty,
+            size,
+          }));
+          let user_contact = order.userDetails.phone;
+          user_contact = user_contact.startsWith("+91")
+            ? user_contact
+            : "+91" + user_contact;
+          const price = order.totalSP;
+
+          await sendSMS.orderConfirmedUser(user_contact, items, price, id);
+        } catch (error) {
+          console.error(error);
+        }
+        break;
+      default:
+        break;
+    }
   } catch (error) {
     console.error(error);
     return next(new AppError("Error Updating Status", 400));
