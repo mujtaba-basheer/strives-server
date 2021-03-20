@@ -613,6 +613,9 @@ exports.addProduct = asyncHandler(async (req, res, next, db) => {
     // adding name-slug
     data.slug_name = slugify(data.name, slugOptions);
 
+    // adding block
+    data.isBlocked = false;
+
     await db.collection("products").insertOne(data);
 
     res.status(200).json({

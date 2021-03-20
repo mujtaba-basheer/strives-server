@@ -7,7 +7,7 @@ const AppError = require("../utils/appError");
 // get products with given queries
 exports.getProducts = asyncHandler(async (req, res, next, db) => {
   const queryObj = Object.assign({}, req.query),
-    filterObj = {},
+    filterObj = { isBlocked: false },
     sortObj = {};
 
   // category
