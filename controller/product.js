@@ -26,7 +26,22 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
   }
 
   // material
-  if (queryObj.material) filterObj.materials = { $all: [queryObj.material] };
+  if (queryObj.material) {
+    const materials = queryObj.material.toLowerCase().split(" ");
+    filterObj.materials = { $all: materials };
+  }
+
+  // size
+  if (queryObj.size) {
+    const sizes = queryObj.size.toUpperCase().split(" ");
+    filterObj.size = { $in: sizes };
+  }
+
+  // colour
+  if (queryObj.colour) {
+    const colours = queryObj.colour.toLowerCase().split(" ");
+    filterObj.colour = { $in: colours };
+  }
 
   // min-price
   if (queryObj.min) filterObj.sp = { $gte: Number(queryObj.min) };
