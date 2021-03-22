@@ -553,12 +553,36 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
   }
 });
 
+// get product by id
+exports.getProduct = asyncHandler(async (req, res, next, db) => {
+  const { id } = req.params;
+
+  try {
+    const product = await db
+      .collection("products")
+      .findOne({ _id: ObjectID(id) });
+
+    res.status(200).json({
+      status: true,
+      data: product,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error fetching product", 503));
+  }
+});
+
 // add product
 exports.addProduct = asyncHandler(async (req, res, next, db) => {
   const data = Object.assign({}, req.body);
 
   try {
     data.category = ObjectID(data.category);
+
+    if (data.sub_categories) {
+      for (let subcat of data.sub_categories)
+        subcat["_id"] = ObjectID(subcat["_id"]);
+    }
 
     if (process.env.NODE_ENV === "development")
       console.log("Uploading Main Images...");
@@ -625,6 +649,42 @@ exports.addProduct = asyncHandler(async (req, res, next, db) => {
   } catch (error) {
     console.error(error);
     return next(new AppError("Error Adding Product", 502));
+  }
+});
+
+// update product
+exports.updateProduct = asyncHandler(async (req, res, next, db) => {
+  const { id } = req.params;
+  const data = Object.assign({}, req.body);
+
+  try {
+    data.category = ObjectID(data.category);
+
+    if (data.sub_categories) {
+      for (let subcat of data.sub_categories) {
+        subcat["_id"] = ObjectID(subcat["_id"]);
+        console.log(subcat["_id"]);
+      }
+    }
+
+    if (data.colour) data.colour._id = ObjectID(data.colour._id);
+
+    delete data._id;
+
+    // adding name-slug
+    data.slug_name = slugify(data.name, slugOptions);
+
+    await db
+      .collection("products")
+      .updateOne({ _id: ObjectID(id) }, { $set: data });
+
+    res.status(200).json({
+      status: true,
+      message: "Product Updated Successfully.",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error Updating Product", 502));
   }
 });
 

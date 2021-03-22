@@ -197,6 +197,16 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => adminController.addProduct(req, res, next, db)
     );
     router.get(
+      "/product/:id",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.getProduct(req, res, next, db)
+    );
+    router.put(
+      "/product/:id",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.updateProduct(req, res, next, db)
+    );
+    router.get(
       "/products",
       (req, res, next) => checkAdmin(req, res, next, db),
       (req, res, next) => adminController.getProducts(req, res, next, db)
