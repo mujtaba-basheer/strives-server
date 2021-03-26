@@ -1,6 +1,7 @@
 const { ObjectID } = require("mongodb");
 const asyncHandler = require("express-async-handler");
 const AppError = require("../utils/appError");
+const { query } = require("express");
 
 /* ----------- Products ----------- */
 
@@ -9,6 +10,12 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
   const queryObj = Object.assign({}, req.query),
     filterObj = { isBlocked: false },
     sortObj = {};
+
+  let skip = 0,
+    limit = 20;
+
+  // pagination
+  if (query.page) skip = (Number(query.page) - 1) * 20;
 
   // category
   if (queryObj.category) filterObj.category = ObjectID(queryObj.category);
@@ -67,6 +74,8 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
         "gallery.small.details": 0,
       })
       .sort(sortObj)
+      .skip(skip)
+      .limit(limit)
       .toArray();
 
     res.status(200).json({
