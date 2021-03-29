@@ -15,7 +15,7 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
     limit = 20;
 
   // pagination
-  if (query.page) skip = (Number(query.page) - 1) * 20;
+  if (queryObj.page) skip = (Number(queryObj.page) - 1) * 20;
 
   // category
   if (queryObj.category) filterObj.category = ObjectID(queryObj.category);
