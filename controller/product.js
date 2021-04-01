@@ -106,9 +106,6 @@ exports.getPages = asyncHandler(async (req, res, next, db) => {
   const queryObj = Object.assign({}, req.query),
     filterObj = { isBlocked: false };
 
-  // pagination
-  if (queryObj.page) skip = (Number(queryObj.page) - 1) * 20;
-
   // category
   if (queryObj.category) filterObj.category = ObjectID(queryObj.category);
 
@@ -156,7 +153,7 @@ exports.getPages = asyncHandler(async (req, res, next, db) => {
 
   try {
     let pages = await db.collection("products").countDocuments(filterObj);
-    pages = Math.ceil(pages / 6);
+    pages = Math.ceil(pages / 20);
 
     res.status(200).json({
       status: true,
