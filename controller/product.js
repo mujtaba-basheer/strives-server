@@ -11,6 +11,8 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
     filterObj = { isBlocked: false },
     sortObj = {};
 
+  console.log(queryObj);
+
   let skip = 0,
     limit = 20;
 
