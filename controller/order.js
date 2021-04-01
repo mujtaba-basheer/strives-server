@@ -74,6 +74,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res, next, db) => {
 exports.placeOrder = asyncHandler(async (req, res, next, db) => {
   const data = Object.assign({}, req.body),
     userId = req.user ? ObjectID(req.user["_id"]) : "guest";
+  let order_id;
 
   try {
     for (let item of data.items) {
@@ -94,8 +95,9 @@ exports.placeOrder = asyncHandler(async (req, res, next, db) => {
     data.status = "on-hold";
 
     const {
-      ops: [{ _id: order_id }],
+      ops: [{ _id }],
     } = await db.collection("orders").insertOne(data);
+    order_id = _id;
 
     res.status(200).json({
       status: true,
@@ -109,7 +111,14 @@ exports.placeOrder = asyncHandler(async (req, res, next, db) => {
   // send SMS to user
   try {
     await sendSMS.orderPlacedUser(data.userDetails.mobile, order_id);
-  } catch (error) {}
+    await sendSMS.orderPlacedAdmin(
+      data.userDetails.mobile,
+      data.totalSP,
+      order_id
+    );
+  } catch (error) {
+    console.error(error);
+  }
 });
 
 /* ----------- Coupon ----------- */

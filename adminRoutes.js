@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { MongoClient } = require("mongodb");
 const sendSMS = require("./utils/sendSMS");
+const sendEmail = require("./utils/sendEmail");
 require("dotenv").config();
 require("colors");
 
@@ -260,9 +261,24 @@ MongoClient.connect(db_uri, options, (err, client) => {
     );
 
     /* ----------- Test Routes ----------- */
+
     router.get("/test/sms", async (req, res) => {
       try {
         const resp = await sendSMS.sendTestSMS();
+        res.json({
+          status: true,
+          message: resp,
+        });
+      } catch (error) {
+        res.status(501).json({
+          status: false,
+          message: "Error :-/",
+        });
+      }
+    });
+    router.get("/test/mail", async (req, res) => {
+      try {
+        const resp = await sendEmail.sendTestMail();
         res.json({
           status: true,
           message: resp,
