@@ -33,14 +33,25 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
   }
 
   // material
-  if (queryObj.materials) filterObj.materials = { $all: materials };
+  if (queryObj.materials) {
+    if (Array.isArray(queryObj.materials))
+      filterObj.materials = { $in: queryObj.materials };
+    else filterObj.materials = queryObj.materials;
+  }
 
   // size
-  if (queryObj.sizes) filterObj.available_sizes = { $all: sizes };
+  if (queryObj.sizes) {
+    if (Array.isArray(queryObj.sizes))
+      filterObj.available_sizes = { $in: sizes };
+    else filterObj.available_sizes = queryObj.sizes;
+  }
 
   // colour
-  if (queryObj.colours)
-    filterObj["colour.slug_name"] = { $in: queryObj.colours };
+  if (queryObj.colours) {
+    if (Array.isArray(queryObj.colours))
+      filterObj["colour.slug_name"] = { $in: queryObj.colours };
+    else filterObj["colour.slug_name"] = queryObj.colours;
+  }
 
   // min-price
   if (queryObj.min) filterObj.sp = { $gte: Number(queryObj.min) };
@@ -81,6 +92,73 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
     res.status(200).json({
       status: true,
       data: products,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error", 503));
+  }
+});
+
+// get number of pages with given queries
+exports.getPages = asyncHandler(async (req, res, next, db) => {
+  const queryObj = Object.assign({}, req.query),
+    filterObj = { isBlocked: false };
+
+  // pagination
+  if (queryObj.page) skip = (Number(queryObj.page) - 1) * 20;
+
+  // category
+  if (queryObj.category) filterObj.category = ObjectID(queryObj.category);
+
+  // sub-category
+  if (queryObj["sub-category"])
+    filterObj["sub_categories"] = {
+      $elemMatch: { value: queryObj["sub-category"] },
+    };
+
+  // search
+  if (queryObj.keyword) {
+    const keywords = queryObj.keyword.toLowerCase().split(" ");
+    filterObj["tags"] = { $all: keywords };
+  }
+
+  // material
+  if (queryObj.materials) {
+    if (Array.isArray(queryObj.materials))
+      filterObj.materials = { $in: queryObj.materials };
+    else filterObj.materials = queryObj.materials;
+  }
+
+  // sizes
+  if (queryObj.sizes) {
+    if (Array.isArray(queryObj.sizes))
+      filterObj.available_sizes = { $in: sizes };
+    else filterObj.available_sizes = queryObj.sizes;
+  }
+
+  // colour
+  if (queryObj.colours) {
+    if (Array.isArray(queryObj.colours))
+      filterObj["colour.slug_name"] = { $in: queryObj.colours };
+    else filterObj["colour.slug_name"] = queryObj.colours;
+  }
+
+  // min-price
+  if (queryObj.min) filterObj.sp = { $gte: Number(queryObj.min) };
+
+  // max-price
+  if (queryObj.max) {
+    if (filterObj.sp) filterObj.sp["$lte"] = Number(queryObj.max);
+    else filterObj.sp = { $lte: Number(queryObj.max) };
+  }
+
+  try {
+    let pages = await db.collection("products").countDocuments(filterObj);
+    pages = Math.ceil(pages / 6);
+
+    res.status(200).json({
+      status: true,
+      data: pages,
     });
   } catch (error) {
     console.error(error);
