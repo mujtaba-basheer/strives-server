@@ -515,6 +515,95 @@ exports.getImages = asyncHandler(async (req, res, next, db) => {
   }
 });
 
+/* ----------- Collection ----------- */
+
+// add new collection
+exports.addCollection = asyncHandler(async (req, res, next, db) => {
+  const { name } = req.body;
+  const slug_name = slugify(name, slugOptions);
+
+  try {
+    // fetching collection if present
+    const collectionDoc = await db
+      .collection("collections")
+      .findOne({ slug_name });
+
+    // checking if collection already exists
+    if (!collectionDoc) {
+      // adding collection
+      await db.collection("collections").insertOne({ name, slug_name });
+
+      res.status(200).json({
+        status: true,
+        message: "Collection Added Successfully",
+      });
+    } else return next(new AppError("Collection already exists", 401));
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error adding collection", 500));
+  }
+});
+
+// get all collections
+exports.getCollections = asyncHandler(async (req, res, next, db) => {
+  try {
+    // fetching collections
+    const collections = await db
+      .collection("collections")
+      .find()
+      .sort({ slug_name: 1 })
+      .toArray();
+
+    res.status(200).json({
+      status: true,
+      data: collections,
+      message: "Collections Fetched Successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error fetching collections.", 500));
+  }
+});
+
+// delete collection
+exports.deleteCollection = asyncHandler(async (req, res, next, db) => {
+  try {
+    // deleting collection
+    await db
+      .collection("collections")
+      .deleteOne({ _id: ObjectID(req.params.id) });
+
+    res.status(200).json({
+      status: true,
+      message: "Collection Deleted Successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error deleting collection", 500));
+  }
+});
+
+// get all collection
+exports.getCollection = asyncHandler(async (req, res, next, db) => {
+  try {
+    // fetching collections
+    const collections = await db
+      .collection("collections")
+      .find()
+      .sort({ slug_name: 1 })
+      .toArray();
+
+    res.status(200).json({
+      status: true,
+      data: collections,
+      message: "Collections Fetched Successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error fetching collections.", 500));
+  }
+});
+
 /* ----------- Product ----------- */
 
 // get all products
@@ -579,6 +668,7 @@ exports.addProduct = asyncHandler(async (req, res, next, db) => {
   try {
     data.category = ObjectID(data.category);
 
+    if (data.collection) data.collection = ObjectID(data.collection);
     if (data.sub_categories) {
       for (let subcat of data.sub_categories)
         subcat["_id"] = ObjectID(subcat["_id"]);
@@ -660,6 +750,7 @@ exports.updateProduct = asyncHandler(async (req, res, next, db) => {
   try {
     data.category = ObjectID(data.category);
 
+    if (data.collection) data.collection = ObjectID(data.collection);
     if (data.sub_categories) {
       for (let subcat of data.sub_categories) {
         subcat["_id"] = ObjectID(subcat["_id"]);

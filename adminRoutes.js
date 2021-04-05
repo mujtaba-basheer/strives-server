@@ -139,6 +139,33 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => adminController.deleteColour(req, res, next, db)
     );
 
+    /* ----------- Collections ----------- */
+
+    // add collection
+    router.post(
+      "/collection",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.addCollection(req, res, next, db)
+    );
+    // get collections
+    router.get(
+      "/collections",
+      // (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.getCollections(req, res, next, db)
+    );
+    // get collection
+    router.get(
+      "/collection/:id",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.getCollection(req, res, next, db)
+    );
+    // delete collection
+    router.delete(
+      "/collection/:id",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.deleteCollection(req, res, next, db)
+    );
+
     /* ----------- Sub-Category Routes ----------- */
 
     // add sub-category
@@ -176,7 +203,7 @@ MongoClient.connect(db_uri, options, (err, client) => {
 
     router.post(
       "/image",
-      (req, res, next) => checkAdmin(req, res, next, db),
+      // (req, res, next) => checkAdmin(req, res, next, db),
       (req, res, next) => adminController.uploadImage(req, res, next, db)
     );
     router.get(

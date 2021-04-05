@@ -2,6 +2,8 @@ const { ObjectID } = require("mongodb");
 const asyncHandler = require("express-async-handler");
 const AppError = require("../utils/appError");
 
+/* ----------- Details ----------- */
+
 // get user details
 exports.get = asyncHandler(async (req, res, next, db) => {
   try {
@@ -60,6 +62,15 @@ exports.update = asyncHandler(async (req, res, next, db) => {
     console.error(error);
     return next(new AppError("Error Updating Details.", 400));
   }
+});
+
+/* ----------- Newsletter ----------- */
+
+// add to newsletter
+
+// TODO: Edit this function
+exports.addToNewsLetter = asyncHandler(async (req, res, db) => {
+  const { email } = req.body;
 });
 
 /* ----------- Addresses ----------- */
