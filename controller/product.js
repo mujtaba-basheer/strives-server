@@ -19,6 +19,13 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
   // pagination
   if (queryObj.page) skip = (Number(queryObj.page) - 1) * 20;
 
+  // occasion
+  if (queryObj.occasion)
+    filterObj["sub_categories.value"] = {
+      $regex: queryObj.occasion,
+      $options: "i",
+    };
+
   // category
   if (queryObj.category) filterObj.category = ObjectID(queryObj.category);
 
@@ -128,6 +135,13 @@ exports.getPages = asyncHandler(async (req, res, next, db) => {
     else filterObj.materials = queryObj.materials;
   }
 
+  // occasion
+  if (queryObj.occasion)
+    filterObj["sub_categories.value"] = {
+      $regex: queryObj.occasion,
+      $options: "i",
+    };
+
   // sizes
   if (queryObj.sizes) {
     if (Array.isArray(queryObj.sizes))
@@ -186,8 +200,6 @@ exports.getProduct = asyncHandler(async (req, res, next, db) => {
 
 // get list of collections
 exports.getCollectionsList = asyncHandler(async (req, res, next, db) => {
-  const collectionId = ObjectID(req.params.id);
-
   try {
     const collections = await db
       .collection("collections")
