@@ -192,6 +192,20 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => productController.clearCart(req, res, next, db)
     );
 
+    /* ----------- Collection Routes ----------- */
+
+    router.get(
+      "/collections-list",
+      // (req, res, next) => protect(req, res, next, db),
+      (req, res, next) =>
+        productController.getCollectionsList(req, res, next, db)
+    );
+    router.get(
+      "/collection/:id",
+      // (req, res, next) => protect(req, res, next, db),
+      (req, res, next) => productController.getCollection(req, res, next, db)
+    );
+
     /* ----------- Coupon Routes ----------- */
 
     router.get(

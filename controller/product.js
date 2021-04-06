@@ -182,6 +182,80 @@ exports.getProduct = asyncHandler(async (req, res, next, db) => {
   }
 });
 
+/* ----------- Collections ----------- */
+
+// get list of collections
+exports.getCollectionsList = asyncHandler(async (req, res, next, db) => {
+  const collectionId = ObjectID(req.params.id);
+
+  try {
+    const collections = await db
+      .collection("collections")
+      .aggregate([
+        {
+          $lookup: {
+            from: "products",
+            as: "products",
+            let: { collection_id: "$_id" },
+            pipeline: [
+              {
+                $match: { $expr: { $eq: ["$collection", "$$collection_id"] } },
+              },
+              {
+                $limit: 4,
+              },
+            ],
+          },
+        },
+      ])
+      .toArray();
+
+    res.json({
+      status: true,
+      data: collections,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error fetching collections", 500));
+  }
+});
+
+// get single collection's products
+exports.getCollection = asyncHandler(async (req, res, next, db) => {
+  const collectionId = ObjectID(req.params.id);
+
+  try {
+    const [collection] = await db
+      .collection("collections")
+      .aggregate([
+        {
+          $match: { _id: collectionId },
+        },
+        {
+          $lookup: {
+            from: "products",
+            as: "products",
+            let: { collection_id: "$_id" },
+            pipeline: [
+              {
+                $match: { $expr: { $eq: ["$collection", "$$collection_id"] } },
+              },
+            ],
+          },
+        },
+      ])
+      .toArray();
+
+    res.json({
+      status: true,
+      data: collection,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error fetching collection", 500));
+  }
+});
+
 /* ----------- Favourites ----------- */
 
 exports.getFavourites = asyncHandler(async (req, res, next, db) => {
