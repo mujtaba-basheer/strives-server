@@ -674,6 +674,11 @@ exports.addProduct = asyncHandler(async (req, res, next, db) => {
         subcat["_id"] = ObjectID(subcat["_id"]);
     }
 
+    // checking for null images
+
+    data.gallery.main = data.gallery.main.filter((val) => !!val);
+    data.gallery.small = data.gallery.small.filter((val) => !!val);
+
     if (process.env.NODE_ENV === "development")
       console.log("Uploading Main Images...");
     for (let i = 0; i < data.gallery.main.length; i++) {
