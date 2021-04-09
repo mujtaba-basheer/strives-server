@@ -519,7 +519,7 @@ exports.getImages = asyncHandler(async (req, res, next, db) => {
 
 // add new collection
 exports.addCollection = asyncHandler(async (req, res, next, db) => {
-  const { name } = req.body;
+  const { name, tagline } = req.body;
   const slug_name = slugify(name, slugOptions);
 
   try {
@@ -531,7 +531,9 @@ exports.addCollection = asyncHandler(async (req, res, next, db) => {
     // checking if collection already exists
     if (!collectionDoc) {
       // adding collection
-      await db.collection("collections").insertOne({ name, slug_name });
+      await db
+        .collection("collections")
+        .insertOne({ name, slug_name, tagline });
 
       res.status(200).json({
         status: true,
@@ -541,6 +543,40 @@ exports.addCollection = asyncHandler(async (req, res, next, db) => {
   } catch (error) {
     console.error(error);
     return next(new AppError("Error adding collection", 500));
+  }
+});
+
+// edit single collection
+exports.updateCollection = asyncHandler(async (req, res, next, db) => {
+  const collectionId = ObjectID(req.params.id);
+
+  const { name, tagline } = req.body;
+  const slug_name = slugify(name, slugOptions);
+
+  try {
+    // fetching collection if present
+    const collectionDoc = await db
+      .collection("collections")
+      .findOne({ slug_name });
+
+    // checking if collection already exists
+    if (!collectionDoc || collectionId !== collectionDoc["_id"]) {
+      // adding collection
+      await db
+        .collection("collections")
+        .updateOne(
+          { _id: collectionId },
+          { $set: { name, slug_name, tagline } }
+        );
+
+      res.status(200).json({
+        status: true,
+        message: "Collection Added Successfully",
+      });
+    } else return next(new AppError("Collection already exists", 401));
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error updating collection", 500));
   }
 });
 

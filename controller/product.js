@@ -26,6 +26,9 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
       $options: "i",
     };
 
+  // collection
+  if (queryObj.collection) filterObj.collection = ObjectID(queryObj.collection);
+
   // category
   if (queryObj.category) filterObj.category = ObjectID(queryObj.category);
 
@@ -127,6 +130,9 @@ exports.getPages = asyncHandler(async (req, res, next, db) => {
     const keywords = queryObj.keyword.toLowerCase().split(" ");
     filterObj["tags"] = { $all: keywords };
   }
+
+  // collection
+  if (queryObj.collection) filterObj.collection = ObjectID(queryObj.collection);
 
   // material
   if (queryObj.materials) {

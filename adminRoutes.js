@@ -147,10 +147,16 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => checkAdmin(req, res, next, db),
       (req, res, next) => adminController.addCollection(req, res, next, db)
     );
+    // update collection
+    router.put(
+      "/collection/:id",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.updateCollection(req, res, next, db)
+    );
     // get collections
     router.get(
       "/collections",
-      // (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => checkAdmin(req, res, next, db),
       (req, res, next) => adminController.getCollections(req, res, next, db)
     );
     // get collection
