@@ -100,6 +100,12 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => userController.addAddress(req, res, next, db)
     );
 
+    /* ----------- Newsletter Route ----------- */
+
+    router.post("/newsletter", (req, res, next) =>
+      userController.addToNewsLetter(req, res, next, db)
+    );
+
     /* ----------- Order Routes ----------- */
 
     router.get("/credentials", (req, res, next) =>

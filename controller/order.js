@@ -44,8 +44,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res, next, db) => {
 
     // order options
     const options = {
-      // TODO: remove hardcoded amount
-      amount: 100,
+      amount: amount * 100,
       currency: "INR",
       receipt: uuid(),
     };
