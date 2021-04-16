@@ -68,7 +68,7 @@ exports.update = asyncHandler(async (req, res, next, db) => {
 
 // add to newsletter
 
-exports.addToNewsLetter = asyncHandler(async (req, res, db) => {
+exports.addToNewsLetter = asyncHandler(async (req, res, next, db) => {
   const { email } = req.body;
 
   try {
