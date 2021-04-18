@@ -7,3 +7,5 @@ script.js
 .prettierrc
 
 /archives
+
+package-lock.json
