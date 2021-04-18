@@ -68,9 +68,29 @@ exports.update = asyncHandler(async (req, res, next, db) => {
 
 // add to newsletter
 
-// TODO: Edit this function
-exports.addToNewsLetter = asyncHandler(async (req, res, db) => {
+exports.addToNewsLetter = asyncHandler(async (req, res, next, db) => {
   const { email } = req.body;
+
+  try {
+    // checking if email exists
+
+    const subDoc = await db.collection("newsletter").findOne({ email });
+
+    if (!subDoc) {
+      await db.collection("newsletter").insertOne({
+        email,
+        date: new Date(),
+      });
+
+      res.status(200).json({
+        status: true,
+        message: "Successfully added to our newsletter.",
+      });
+    } else return next(new AppError("You've already subscribed.", 400));
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error subscribing. Please try again.", 400));
+  }
 });
 
 /* ----------- Addresses ----------- */
