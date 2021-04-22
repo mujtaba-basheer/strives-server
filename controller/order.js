@@ -122,9 +122,8 @@ exports.placeOrder = asyncHandler(async (req, res, next, db) => {
 
 // get single order
 exports.getOrder = asyncHandler(async (req, res, next, db) => {
-  const orderId = ObjectID(req.params.id);
-
   try {
+    const orderId = ObjectID(req.params.id);
     const order = await db.collection("orders").findOne({ _id: orderId });
     if (order) {
       res.status(200).json({
