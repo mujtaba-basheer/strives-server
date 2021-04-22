@@ -35,8 +35,11 @@ const sendTestSMS = () => {
       },
       MessageConfiguration: {
         SMSMessage: {
-          Body: `This is a test message`,
+          Body: `Your 'The Strives' verification OTP code is 4543. Code valid for 10 minutes only, one-time use. Please DO NOT share this OTP with anyone.`,
           MessageType: "TRANSACTIONAL",
+          EntityId: "110135350000049663",
+          TemplateId: "1107161701552665238",
+          SenderId: "STRVES",
         },
       },
     },
@@ -157,7 +160,8 @@ const sendOrderDetails = (destination) => {
 };
 
 const orderPlacedUser = async (user_contact, order_id) => {
-  const message = `Your order has been successfully placed.\nThe Strives`;
+  if (!user_contact.startsWith("+91")) user_contact = "+91" + user_contact;
+  const message = `Hey there! Your 'The Strives' order ${order_id}, is getting ready and will be dispatched soon. Sit back & relax while we have this delivered to you. For more details, please click here {#var#}.`;
 
   const params = {
     ApplicationId: applicationId,
@@ -171,6 +175,9 @@ const orderPlacedUser = async (user_contact, order_id) => {
         SMSMessage: {
           Body: message,
           MessageType: "TRANSACTIONAL",
+          EntityId: "110135350000049663",
+          TemplateId: "1107161701552665238",
+          SenderId: "STRVES",
         },
       },
     },

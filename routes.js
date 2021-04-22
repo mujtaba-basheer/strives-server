@@ -119,6 +119,9 @@ MongoClient.connect(db_uri, options, (err, client) => {
       (req, res, next) => checkUser(req, res, next, db),
       (req, res, next) => orderController.placeOrder(req, res, next, db)
     );
+    router.get("/order/:id", (req, res, next) =>
+      orderController.getOrder(req, res, next, db)
+    );
     router.get(
       "/orders",
       (req, res, next) => checkUser(req, res, next, db),
