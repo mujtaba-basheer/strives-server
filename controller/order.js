@@ -110,11 +110,11 @@ exports.placeOrder = asyncHandler(async (req, res, next, db) => {
   // send SMS to user
   try {
     await sendSMS.orderPlacedUser(data.userDetails.phone, order_id);
-    await sendSMS.orderPlacedAdmin(
-      data.userDetails.phone,
-      data.totalSP,
-      order_id
-    );
+    // await sendSMS.orderPlacedAdmin(
+    //   data.userDetails.phone,
+    //   data.totalSP,
+    //   order_id
+    // );
   } catch (error) {
     console.error(error);
   }
