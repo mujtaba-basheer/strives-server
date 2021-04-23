@@ -101,6 +101,7 @@ exports.placeOrder = asyncHandler(async (req, res, next, db) => {
     res.status(200).json({
       status: true,
       message: "Order Placed Successfully",
+      order_id,
     });
   } catch (error) {
     console.error(error);

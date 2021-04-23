@@ -150,7 +150,7 @@ exports.login = asyncHandler(async (req, res, next, db) => {
         data: user,
         token: authUtil.generateToken(user),
       });
-    } else return next(new AppError("Incorrect Password.", 401));
+    } else return next(new AppError("Incorrect Password.", 402));
   } else return next(new AppError("User not found.", 404));
 });
 
