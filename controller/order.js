@@ -134,7 +134,7 @@ exports.getOrder = asyncHandler(async (req, res, next, db) => {
     } else return next(new AppError("Order not found.", 404));
   } catch (error) {
     console.error(error);
-    return next(new AppError("Oops! Error Placing Order.", 502));
+    return next(new AppError("Order not found", 502));
   }
 });
 
