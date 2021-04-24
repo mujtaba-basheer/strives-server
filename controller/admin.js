@@ -644,10 +644,22 @@ exports.getCollection = asyncHandler(async (req, res, next, db) => {
 
 // get all products
 exports.getProducts = asyncHandler(async (req, res, next, db) => {
+  const filterObj = Object.assign({}, req.query);
+  const queryObj = {};
+
+  if (filterObj.name)
+    queryObj["name"] = {
+      $regex: filterObj.name,
+      $options: "i",
+    };
+
   try {
     const products = await db
       .collection("products")
       .aggregate([
+        {
+          $match: queryObj,
+        },
         {
           $lookup: {
             from: "categories",
@@ -823,9 +835,13 @@ exports.updateProduct = asyncHandler(async (req, res, next, db) => {
 // update product images
 exports.updateProductImages = asyncHandler(async (req, res, next, db) => {
   const productId = ObjectID(req.params.id);
-  const { gallery, oldGallery } = Object.assign({}, req.body);
+  const gallery = Object.assign({}, req.body);
 
   try {
+    const { gallery: oldGallery } = await db
+      .collection("products")
+      .findOne({ _id: productId });
+
     // checking for null images
 
     gallery.main = gallery.main.filter((val) => !!val);
@@ -896,30 +912,25 @@ exports.updateProductImages = asyncHandler(async (req, res, next, db) => {
 
     // deleting unrequired assets
 
-    for (let main_image of oldGallery.main) {
-      if (!mainSet.has(main_image.details["Key"])) {
-        try {
+    try {
+      for (let main_image of oldGallery.main) {
+        if (main_image.details && !mainSet.has(main_image.details["Key"])) {
           await deleteAsset(main_image.details["Key"]);
-        } catch (error) {
-          console.error(error);
-          console.log(
-            `Error Deleting Asset with Key: ${main_image.details["Key"]}`
-          );
+          if (process.env.NODE_ENV === "development")
+            console.log(`Deleted: ${main_image.details["Key"]}`);
         }
       }
-    }
 
-    for (let small_image of oldGallery.small) {
-      if (!smallSet.has(small_image.details["Key"])) {
-        try {
+      for (let small_image of oldGallery.small) {
+        if (small_image.details && !smallSet.has(small_image.details["Key"])) {
           await deleteAsset(small_image.details["Key"]);
-        } catch (error) {
-          console.error(error);
-          console.log(
-            `Error Deleting Asset with Key: ${small_image.details["Key"]}`
-          );
+          if (process.env.NODE_ENV === "development")
+            console.log(`Deleted: ${small_image.details["Key"]}`);
         }
       }
+    } catch (error) {
+      console.error(error);
+      console.log(`Error deleting asset`);
     }
   } catch (error) {
     console.error(error);
