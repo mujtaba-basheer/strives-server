@@ -820,6 +820,132 @@ exports.updateProduct = asyncHandler(async (req, res, next, db) => {
   }
 });
 
+// update product images
+exports.updateProductImages = asyncHandler(async (req, res, next, db) => {
+  const productId = ObjectID(req.params.id);
+  const { gallery, oldGallery } = Object.assign({}, req.body);
+
+  try {
+    // checking for null images
+
+    gallery.main = gallery.main.filter((val) => !!val);
+    gallery.small = gallery.small.filter((val) => !!val);
+
+    // initializing sets
+
+    const mainSet = new Set(),
+      smallSet = new Set();
+
+    if (process.env.NODE_ENV === "development")
+      console.log("Uploading Main Images...");
+    for (let i = 0; i < gallery.main.length; i++) {
+      try {
+        if (gallery.main[i].details)
+          mainSet.add(gallery.main[i].details["Key"]);
+        else {
+          const { mimeType, data: base64data, extension } = gallery.main[i];
+          const fileName = uuid() + extension;
+
+          const res3 = await uploadFile(mimeType, base64data, fileName);
+          const { Location, ETag, Key } = res3;
+
+          gallery.main[i].src = Location;
+          gallery.main[i].details = { ETag, Key };
+
+          delete gallery.main[i].data;
+        }
+      } catch (error) {
+        console.error(error);
+        console.log(`Error @ gallery.main[${i}]: ${error.message}.`);
+      }
+    }
+
+    if (process.env.NODE_ENV === "development")
+      console.log("Uploading Thumbnail Images...");
+
+    for (let i = 0; i < gallery.small.length; i++) {
+      try {
+        if (gallery.small[i].details)
+          smallSet.add(gallery.small[i].details["Key"]);
+        else {
+          const { mimeType, data: base64data, extension } = gallery.small[i];
+          const fileName = uuid() + extension;
+
+          const res3 = await uploadFile(mimeType, base64data, fileName);
+          const { Location, ETag, Key } = res3;
+
+          gallery.small[i].src = Location;
+          gallery.small[i].details = { ETag, Key };
+
+          delete gallery.small[i].data;
+        }
+      } catch (error) {
+        console.error(error);
+        console.log(`Error @ gallery.small[${i}]: ${error.message}.`);
+      }
+    }
+
+    await db
+      .collection("products")
+      .updateOne({ _id: productId }, { $set: { gallery } });
+
+    res.status(200).json({
+      status: true,
+      message: "Product Images Updated Successfully.",
+    });
+
+    // deleting unrequired assets
+
+    for (let main_image of oldGallery.main) {
+      if (!mainSet.has(main_image.details["Key"]))
+        await deleteAsset(main_image.details["Key"]);
+    }
+
+    for (let small_image of oldGallery.small) {
+      if (!smallSet.has(small_image.details["Key"]))
+        await deleteAsset(small_image.details["Key"]);
+    }
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error Updating Product Images", 502));
+  }
+});
+
+// update product
+exports.updateProduct = asyncHandler(async (req, res, next, db) => {
+  const { id } = req.params;
+  const gallery = Object.assign({}, req.body);
+
+  try {
+    if (data.collection) data.collection = ObjectID(data.collection);
+    if (data.sub_categories) {
+      for (let subcat of data.sub_categories) {
+        subcat["_id"] = ObjectID(subcat["_id"]);
+        console.log(subcat["_id"]);
+      }
+    }
+
+    if (data.colour) data.colour._id = ObjectID(data.colour._id);
+
+    delete data._id;
+
+    // adding name-slug
+    data.slug_name = slugify(data.name, slugOptions);
+
+    await db
+      .collection("products")
+      .updateOne({ _id: ObjectID(id) }, { $set: data });
+
+    res.status(200).json({
+      status: true,
+      message: "Product Updated Successfully.",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error Updating Product", 502));
+  }
+});
+
 // block/unblock product
 exports.blockUnblockProduct = asyncHandler(async (req, res, next, db) => {
   const { id } = req.params;
