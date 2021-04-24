@@ -897,13 +897,29 @@ exports.updateProductImages = asyncHandler(async (req, res, next, db) => {
     // deleting unrequired assets
 
     for (let main_image of oldGallery.main) {
-      if (!mainSet.has(main_image.details["Key"]))
-        await deleteAsset(main_image.details["Key"]);
+      if (!mainSet.has(main_image.details["Key"])) {
+        try {
+          await deleteAsset(main_image.details["Key"]);
+        } catch (error) {
+          console.error(error);
+          console.log(
+            `Error Deleting Asset with Key: ${main_image.details["Key"]}`
+          );
+        }
+      }
     }
 
     for (let small_image of oldGallery.small) {
-      if (!smallSet.has(small_image.details["Key"]))
-        await deleteAsset(small_image.details["Key"]);
+      if (!smallSet.has(small_image.details["Key"])) {
+        try {
+          await deleteAsset(small_image.details["Key"]);
+        } catch (error) {
+          console.error(error);
+          console.log(
+            `Error Deleting Asset with Key: ${small_image.details["Key"]}`
+          );
+        }
+      }
     }
   } catch (error) {
     console.error(error);
