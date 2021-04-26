@@ -941,10 +941,11 @@ exports.updateProductImages = asyncHandler(async (req, res, next, db) => {
 // update product
 exports.updateProduct = asyncHandler(async (req, res, next, db) => {
   const { id } = req.params;
-  const gallery = Object.assign({}, req.body);
+  const data = Object.assign({}, req.body);
 
   try {
     if (data.collection) data.collection = ObjectID(data.collection);
+
     if (data.sub_categories) {
       for (let subcat of data.sub_categories) {
         subcat["_id"] = ObjectID(subcat["_id"]);
