@@ -938,42 +938,6 @@ exports.updateProductImages = asyncHandler(async (req, res, next, db) => {
   }
 });
 
-// update product
-exports.updateProduct = asyncHandler(async (req, res, next, db) => {
-  const { id } = req.params;
-  const data = Object.assign({}, req.body);
-
-  try {
-    if (data.collection) data.collection = ObjectID(data.collection);
-
-    if (data.sub_categories) {
-      for (let subcat of data.sub_categories) {
-        subcat["_id"] = ObjectID(subcat["_id"]);
-        console.log(subcat["_id"]);
-      }
-    }
-
-    if (data.colour) data.colour._id = ObjectID(data.colour._id);
-
-    delete data._id;
-
-    // adding name-slug
-    data.slug_name = slugify(data.name, slugOptions);
-
-    await db
-      .collection("products")
-      .updateOne({ _id: ObjectID(id) }, { $set: data });
-
-    res.status(200).json({
-      status: true,
-      message: "Product Updated Successfully.",
-    });
-  } catch (error) {
-    console.error(error);
-    return next(new AppError("Error Updating Product", 502));
-  }
-});
-
 // block/unblock product
 exports.blockUnblockProduct = asyncHandler(async (req, res, next, db) => {
   const { id } = req.params;
