@@ -26,6 +26,13 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
       $options: "i",
     };
 
+  // festival
+  if (queryObj.festival)
+    filterObj["sub_categories.value"] = {
+      $regex: queryObj.festival,
+      $options: "i",
+    };
+
   // collection
   if (queryObj.collection) filterObj.collection = ObjectID(queryObj.collection);
 
@@ -145,6 +152,13 @@ exports.getPages = asyncHandler(async (req, res, next, db) => {
   if (queryObj.occasion)
     filterObj["sub_categories.value"] = {
       $regex: queryObj.occasion,
+      $options: "i",
+    };
+
+  // festival
+  if (queryObj.festival)
+    filterObj["sub_categories.value"] = {
+      $regex: queryObj.festival,
       $options: "i",
     };
 
