@@ -186,12 +186,16 @@ exports.getPages = asyncHandler(async (req, res, next, db) => {
   }
 
   try {
-    let pages = await db.collection("products").countDocuments(filterObj);
-    pages = Math.ceil(pages / 20);
+    let products = await db.collection("products").countDocuments(filterObj);
+    let pages = Math.ceil(products / 20);
 
     res.status(200).json({
       status: true,
       data: pages,
+      number: {
+        pages,
+        products,
+      },
     });
   } catch (error) {
     console.error(error);
