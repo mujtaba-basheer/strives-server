@@ -209,7 +209,7 @@ MongoClient.connect(db_uri, options, (err, client) => {
 
     router.post(
       "/image",
-      // (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => checkAdmin(req, res, next, db),
       (req, res, next) => adminController.uploadImage(req, res, next, db)
     );
     router.get(
@@ -250,6 +250,11 @@ MongoClient.connect(db_uri, options, (err, client) => {
       "/products",
       (req, res, next) => checkAdmin(req, res, next, db),
       (req, res, next) => adminController.getProducts(req, res, next, db)
+    );
+    router.get(
+      "/products-num",
+      (req, res, next) => checkAdmin(req, res, next, db),
+      (req, res, next) => adminController.getProductNum(req, res, next, db)
     );
     router.put(
       "/product/status/:id",

@@ -503,7 +503,11 @@ exports.deleteImage = asyncHandler(async (req, res, next, db) => {
 
 exports.getImages = asyncHandler(async (req, res, next, db) => {
   try {
-    const images = await db.collection("images").find().toArray();
+    const images = await db
+      .collection("images")
+      .find()
+      .sort({ _id: -1 })
+      .toArray();
 
     res.status(200).json({
       status: true,
@@ -646,6 +650,8 @@ exports.getCollection = asyncHandler(async (req, res, next, db) => {
 exports.getProducts = asyncHandler(async (req, res, next, db) => {
   const filterObj = Object.assign({}, req.query);
   const queryObj = {};
+  let skip = 0,
+    limit = 20;
 
   if (filterObj.name)
     queryObj["name"] = {
@@ -653,12 +659,24 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
       $options: "i",
     };
 
+  if (filterObj.page) {
+    const page = Number(filterObj.page);
+
+    skip = parseInt((page - 1) * limit);
+  }
+
   try {
     const products = await db
       .collection("products")
       .aggregate([
         {
           $match: queryObj,
+        },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: limit,
         },
         {
           $lookup: {
@@ -687,6 +705,33 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
   } catch (error) {
     console.error(error);
     return next(new AppError("Error fetching products", 503));
+  }
+});
+
+// get number of products
+exports.getProductNum = asyncHandler(async (req, res, next, db) => {
+  const filterObj = Object.assign({}, req.query);
+  const queryObj = {};
+  limit = 20;
+
+  if (filterObj.name)
+    queryObj["name"] = {
+      $regex: filterObj.name,
+      $options: "i",
+    };
+
+  try {
+    const productsNum = await db
+      .collection("products")
+      .countDocuments(queryObj);
+
+    res.status(200).json({
+      status: true,
+      data: productsNum,
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error fetching no. of products", 503));
   }
 });
 
