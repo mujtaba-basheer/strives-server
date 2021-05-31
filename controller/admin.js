@@ -665,6 +665,8 @@ exports.getProducts = asyncHandler(async (req, res, next, db) => {
     skip = parseInt((page - 1) * limit);
   }
 
+  if (filterObj.category) queryObj["category"] = ObjectID(filterObj.category);
+
   try {
     const products = await db
       .collection("products")
